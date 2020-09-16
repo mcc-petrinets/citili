@@ -1,5 +1,5 @@
 /*
-Citili, a progam for generating CTL formulas for the model checking contest
+Citili, a program for generating CTL formulas for the model checking contest
 Copyright (C) 2020  Loïg Jezequel
 
 This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,16 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 package main
 
+import (
+	"flag"
+)
+
 func main() {
+
+	inputDirPtr := flag.String("inputs", "INPUTS", "directory where the models can be found")
+
+	flag.Parse()
+
+	listModels(*inputDirPtr)
 
 }
