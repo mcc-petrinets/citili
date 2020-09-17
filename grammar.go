@@ -15,23 +15,29 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-
 package main
 
-import (
-	"flag"
-	"fmt"
-)
+const globalMaxArity int = 5
 
-func main() {
+type operator struct {
+	name           string
+	minArity       int
+	maxArity       int
+	isOverBooleans bool
+}
 
-	inputDirPtr := flag.String("inputs", "INPUTS", "directory where the models can be found")
+var booleanOperators []operator = []operator{
+	operator{"atom", 0, 0, false},
+	operator{"A", 1, 1, false},
+	operator{"E", 1, 1, false},
+	operator{"not", 1, 1, true},
+	operator{"and", 2, globalMaxArity, true},
+	operator{"or", 2, globalMaxArity, true},
+}
 
-	flag.Parse()
-
-	models := listModels(*inputDirPtr)
-	getids(models)
-
-	fmt.Println(genCTLFormula(3))
-
+var pathOperators []operator = []operator{
+	operator{"G", 1, 1, false},
+	operator{"F", 1, 1, false},
+	operator{"X", 1, 1, false},
+	operator{"U", 2, 2, false},
 }
