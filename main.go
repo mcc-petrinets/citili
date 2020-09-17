@@ -28,6 +28,7 @@ func main() {
 
 	flag.Parse()
 
-	listModels(*inputDirPtr)
+	models := listModels(*inputDirPtr)
+	getids(models)
 
 }

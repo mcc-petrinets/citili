@@ -25,6 +25,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/loig/pinimili/pnml"
 )
 
 type modelType int
@@ -40,6 +42,8 @@ type modelInfo struct {
 	modelType     modelType
 	modelInstance string
 	twinModel     *modelInfo
+	places        []string // ids of places
+	transitions   []string // ids of transitions
 }
 
 func listModels(inputDir string) []*modelInfo {
@@ -127,4 +131,15 @@ func listModels(inputDir string) []*modelInfo {
 	)
 
 	return models
+}
+
+func getids(models []*modelInfo) {
+	for _, m := range models {
+		m.places, m.transitions = pnml.Getptids(m.filePath)
+		log.Print(
+			m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+			len(m.places), " places and ",
+			len(m.transitions), " transitions.",
+		)
+	}
 }
