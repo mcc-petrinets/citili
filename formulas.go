@@ -17,7 +17,10 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 package main
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type formula struct {
 	operator operator
@@ -102,5 +105,64 @@ func genCTLFireabilityAtom(transitions []string) (f formula) {
 		ff := formula{operator: operator{name: transitions[i]}}
 		f.operand = append(f.operand, ff)
 	}
+	return f
+}
+
+// Generation of a CTLCardinality formula
+func genCTLCardinalityFormula(maxDepth int, places []string) (f formula) {
+	f = genCTLFormula(maxDepth)
+	f.CTLCardinalitySubstituteAtoms(places)
+	return f
+}
+
+func (f *formula) CTLCardinalitySubstituteAtoms(places []string) {
+	if f.operator == atom {
+		*f = genCTLCardinalityAtom(places)
+		return
+	}
+	for opNum := 0; opNum < len(f.operand); opNum++ {
+		f.operand[opNum].CTLCardinalitySubstituteAtoms(places)
+	}
+}
+
+func genCTLCardinalityAtom(places []string) (f formula) {
+	f = formula{operator: leqOperator}
+	f.operand = make([]formula, 2)
+	tokencountChoice := rand.Intn(3) // 0 : tokencount on the left, 1: tokencount on the right, 2: tokencount on both sides
+	switch tokencountChoice {
+	case 0:
+		f.operand[0] = genTokencount(places)
+		f.operand[1] = genIntconstant()
+	case 1:
+		f.operand[0] = genIntconstant()
+		f.operand[1] = genTokencount(places)
+	case 2:
+		f.operand[0] = genTokencount(places)
+		f.operand[1] = genTokencount(places)
+	}
+	return f
+}
+
+func genTokencount(places []string) (f formula) {
+	f = formula{operator: tokencount}
+	f.operand = make([]formula, 0)
+	maxPlaces := len(places)
+	if maxPlaces > globalMaxAtomSize {
+		maxPlaces = globalMaxAtomSize
+	}
+	numPlaces := rand.Intn(maxPlaces) + 1
+	rand.Shuffle(len(places), func(i, j int) { places[i], places[j] = places[j], places[i] })
+	for i := 0; i < numPlaces; i++ {
+		ff := formula{operator: operator{name: places[i]}}
+		f.operand = append(f.operand, ff)
+	}
+	return f
+}
+
+func genIntconstant() (f formula) {
+	f = formula{operator: integerconstant}
+	f.operand = make([]formula, 1)
+	val := fmt.Sprint(rand.Intn(globalMaxIntegerConstant) + 1)
+	f.operand[0] = formula{operator: operator{name: val}}
 	return f
 }

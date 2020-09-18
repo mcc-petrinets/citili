@@ -18,8 +18,9 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 package main
 
 const (
-	globalMaxArity    int = 2
-	globalMaxAtomSize int = 5
+	globalMaxArity           int = 2
+	globalMaxAtomSize        int = 5
+	globalMaxIntegerConstant int = 100
 )
 
 type operator struct {
@@ -31,6 +32,9 @@ type operator struct {
 
 var atom operator = operator{"atom", 0, 0, false}
 var isfireable operator = operator{name: "is-fireable"}
+var tokencount operator = operator{name: "token-count"}
+var leqOperator operator = operator{"leq", 2, 2, false}
+var integerconstant operator = operator{"integer-constant", 1, 1, false}
 
 var booleanOperators []operator = []operator{
 	atom,

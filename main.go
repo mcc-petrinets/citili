@@ -39,6 +39,7 @@ func main() {
 	for _, m := range models {
 		for i := 0; i < *numFormulas; i++ {
 			log.Print(m.modelName, " (", i, "):\n", genCTLFireabilityFormula(*formulaDepth, m.transitions).xmlPrint(*m, i))
+			log.Print(m.modelName, " (", i, "):\n", genCTLCardinalityFormula(*formulaDepth, m.places).xmlPrint(*m, i))
 		}
 	}
 

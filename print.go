@@ -118,8 +118,10 @@ func (f formula) asxml(currentIndent string) (xmlf string) {
 		xmlafter := f.operand[1].asxml(currentIndent + indent + indent)
 		xmlf = fmt.Sprint(
 			currentIndent, "<until>\n",
-			currentIndent, indent, "<before>\n", xmlbefore, "</before>\n",
-			currentIndent, indent, "<after>\n", xmlafter, "</after>\n",
+			currentIndent, indent, "<before>\n", xmlbefore,
+			currentIndent, indent, "</before>\n",
+			currentIndent, indent, "<after>\n", xmlafter,
+			currentIndent, indent, "</after>\n",
 			currentIndent, "</until>\n",
 		)
 	case "is-fireable":
@@ -132,6 +134,30 @@ func (f formula) asxml(currentIndent string) (xmlf string) {
 			xmlt,
 			currentIndent, "</is-fireable>\n",
 		)
+	case "leq":
+		xmlsmall := f.operand[0].asxml(currentIndent + indent)
+		xmlbig := f.operand[1].asxml(currentIndent + indent)
+		xmlf = fmt.Sprint(
+			currentIndent, "<integer-le>\n",
+			xmlsmall, xmlbig,
+			currentIndent, "</integer-le>\n",
+		)
+	case "token-count":
+		xmlp := f.operand[0].asplace(currentIndent + indent)
+		for i := 1; i < len(f.operand); i++ {
+			xmlp = xmlp + f.operand[i].asplace(currentIndent+indent)
+		}
+		xmlf = fmt.Sprint(
+			currentIndent, "<token-count>\n",
+			xmlp,
+			currentIndent, "</token-count>\n",
+		)
+	case "integer-constant":
+		xmlf = fmt.Sprint(
+			currentIndent, "<integer-constant>",
+			f.operand[0].operator.name,
+			"</integer-constant>\n",
+		)
 	}
 
 	return xmlf
@@ -142,4 +168,11 @@ func (f formula) astransition(currentIndent string) (t string) {
 		currentIndent, "<transition>", f.operator.name, "</transition>\n",
 	)
 	return t
+}
+
+func (f formula) asplace(currentIndent string) (p string) {
+	p = fmt.Sprint(
+		currentIndent, "<place>", f.operator.name, "</place>\n",
+	)
+	return p
 }
