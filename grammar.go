@@ -17,7 +17,10 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 package main
 
-const globalMaxArity int = 5
+const (
+	globalMaxArity    int = 2
+	globalMaxAtomSize int = 5
+)
 
 type operator struct {
 	name           string
@@ -26,8 +29,11 @@ type operator struct {
 	isOverBooleans bool
 }
 
+var atom operator = operator{"atom", 0, 0, false}
+var isfireable operator = operator{name: "is-fireable"}
+
 var booleanOperators []operator = []operator{
-	operator{"atom", 0, 0, false},
+	atom,
 	operator{"A", 1, 1, false},
 	operator{"E", 1, 1, false},
 	operator{"not", 1, 1, true},

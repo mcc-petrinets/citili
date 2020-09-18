@@ -32,6 +32,6 @@ func main() {
 	models := listModels(*inputDirPtr)
 	getids(models)
 
-	fmt.Println(genCTLFormula(3))
+	fmt.Println(genCTLFireabilityFormula(3, models[0].transitions))
 
 }
