@@ -20,18 +20,26 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"log"
 )
+
+const version string = "v0.1"
 
 func main() {
 
 	inputDirPtr := flag.String("inputs", "INPUTS", "directory where the models can be found")
+	numFormulas := flag.Int("numformulas", 1, "number of formulas to generate")
+	formulaDepth := flag.Int("depth", 2, "max depth of the formulas to generate")
 
 	flag.Parse()
 
 	models := listModels(*inputDirPtr)
 	getids(models)
 
-	fmt.Println(genCTLFireabilityFormula(3, models[0].transitions))
+	for _, m := range models {
+		for i := 0; i < *numFormulas; i++ {
+			log.Print(m.modelName, " (", i, "):\n", genCTLFireabilityFormula(*formulaDepth, m.transitions).xmlPrint(*m, i))
+		}
+	}
 
 }
