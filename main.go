@@ -33,10 +33,13 @@ func main() {
 
 	models := listModels(*inputDirPtr)
 
-	for _, m := range models {
+	for pos, m := range models {
 		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating formulas")
-		m.getids()
-		m.genFormulas(*numFormulas, *formulaDepth)
+		if m != nil {
+			m.getids()
+			m.genFormulas(*numFormulas, *formulaDepth)
+			models[pos] = nil
+		}
 	}
 
 }
