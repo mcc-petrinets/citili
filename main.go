@@ -28,6 +28,7 @@ func main() {
 	inputDirPtr := flag.String("inputs", "INPUTS", "directory where the models can be found")
 	numFormulas := flag.Int("numformulas", 1, "number of formulas to generate")
 	formulaDepth := flag.Int("depth", 2, "max depth of the formulas to generate")
+	numUnfold := flag.Int("numunfold", 0, "number of formulas to unfold from COL to PT when possible")
 
 	flag.Parse()
 
@@ -37,7 +38,7 @@ func main() {
 		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating formulas")
 		if m != nil {
 			m.getids()
-			m.genFormulas(*numFormulas, *formulaDepth)
+			m.genFormulas(*numFormulas, *formulaDepth, *numUnfold)
 			models[pos] = nil
 		}
 	}

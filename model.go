@@ -137,10 +137,12 @@ func listModels(inputDir string) []*modelInfo {
 }
 
 func (m *modelInfo) getids() {
-	m.places, m.transitions = pnml.Getptids(m.filePath)
-	log.Print(
-		m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
-		len(m.places), " places and ",
-		len(m.transitions), " transitions.",
-	)
+	if m.places == nil || m.transitions == nil {
+		m.places, m.transitions = pnml.Getptids(m.filePath)
+		log.Print(
+			m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+			len(m.places), " places and ",
+			len(m.transitions), " transitions.",
+		)
+	}
 }

@@ -76,9 +76,9 @@ func genCTLFormula(maxDepth int) formula {
 }
 
 // Generation of a CTLFireability formula
-func genCTLFireabilityFormula(maxDepth int, transitions []string) (f formula) {
+func genCTLFireabilityFormula(maxDepth int, m modelInfo) (f formula) {
 	f = genCTLFormula(maxDepth)
-	f.CTLFireabilitySubstituteAtoms(transitions)
+	f.CTLFireabilitySubstituteAtoms(m.transitions)
 	return f
 }
 
@@ -109,9 +109,9 @@ func genCTLFireabilityAtom(transitions []string) (f formula) {
 }
 
 // Generation of a CTLCardinality formula
-func genCTLCardinalityFormula(maxDepth int, places []string) (f formula) {
+func genCTLCardinalityFormula(maxDepth int, m modelInfo) (f formula) {
 	f = genCTLFormula(maxDepth)
-	f.CTLCardinalitySubstituteAtoms(places)
+	f.CTLCardinalitySubstituteAtoms(m.places)
 	return f
 }
 

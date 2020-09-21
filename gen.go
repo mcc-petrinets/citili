@@ -20,23 +20,51 @@ package main
 
 import "log"
 
-func (m modelInfo) genFormulas(numFormulas, depth int) {
+func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int) {
+
+	if m.twinModel != nil {
+		if m.modelType != col {
+			log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), Found a corresponding COL model, unfolding needed")
+			return
+		}
+	}
 
 	// CTLFireability
 	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating CTLFireability formulas")
-	m.genericGeneration(numFormulas, depth, genCTLFireabilityFormula, CTLFireabilityFileName)
+	m.genericGeneration(numFormulas, depth, numUnfold, genCTLFireabilityFormula, CTLFireabilityFileName)
 
 	// CTLCardinality
 	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating CTLCardinality formulas")
-	m.genericGeneration(numFormulas, depth, genCTLCardinalityFormula, CTLCardinalityFileName)
+	m.genericGeneration(numFormulas, depth, numUnfold, genCTLCardinalityFormula, CTLCardinalityFileName)
 
 }
 
-func (m modelInfo) genericGeneration(numFormulas, depth int, generation func(int, []string) formula, outFileName string) {
+func (m *modelInfo) genericGeneration(numFormulas, depth, numUnfold int, generation func(int, modelInfo) formula, outFileName string) {
 	// gen numFormulas formulas
 	formulas := make([]formula, numFormulas)
 	for i := 0; i < numFormulas; i++ {
-		formulas[i] = generation(depth, m.transitions)
+		formulas[i] = generation(depth, *m)
+	}
+
+	// filter easy formula // TODO
+
+	// write to file
+	m.writeFormulas(formulas, outFileName)
+
+	if m.twinModel == nil {
+		return
+	}
+
+	// If there is a corresponding PT model
+	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), Found a corresponding PT model, switching to it")
+	m = m.twinModel
+	m.getids()
+
+	// unfolding numUnfold formulas // TODO
+
+	// generating numFormulas - numUnfold formulas
+	for i := numUnfold; i < numFormulas; i++ {
+		formulas[i] = generation(depth, *m)
 	}
 
 	// filter easy formula // TODO
