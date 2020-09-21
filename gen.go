@@ -18,7 +18,10 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 package main
 
-import "log"
+import (
+	"fmt"
+	"log"
+)
 
 func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int) {
 
@@ -59,8 +62,14 @@ func (m *modelInfo) genericGeneration(numFormulas, depth, numUnfold int, generat
 	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), Found a corresponding PT model, switching to it")
 	m = m.twinModel
 	m.getids()
+	idmapping := m.mapids()
+
+	fmt.Println(idmapping)
 
 	// unfolding numUnfold formulas // TODO
+	for i := 0; i < numUnfold; i++ {
+		formulas[i] = unfolding(formulas[i], idmapping)
+	}
 
 	// generating numFormulas - numUnfold formulas
 	for i := numUnfold; i < numFormulas; i++ {

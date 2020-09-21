@@ -146,3 +146,32 @@ func (m *modelInfo) getids() {
 		)
 	}
 }
+
+func (m modelInfo) mapids() map[string][]string {
+	// when this function is called, m should always be the PT model
+	// TODO, should be improved to be called only once, not for both CTLFireability and CTLCardinality
+	// maybe the mapping should be part of the modelInfo
+	mapping := make(map[string][]string)
+
+	for _, p := range m.twinModel.places {
+		// will not work if a place of the COL model has an id which is a prefix of another place id of this model
+		for _, pp := range m.places {
+			if strings.HasPrefix(pp, p) {
+				mapping[p] = append(mapping[p], pp)
+			}
+		}
+	}
+
+	for _, p := range m.twinModel.transitions {
+		// will not work if a transition of the COL model has an id which is a prefix of another transition id of this model
+		for _, pp := range m.transitions {
+			if strings.HasPrefix(pp, p) {
+				mapping[p] = append(mapping[p], pp)
+			}
+		}
+	}
+
+	// will not work if places and transitions overlap
+
+	return mapping
+}
