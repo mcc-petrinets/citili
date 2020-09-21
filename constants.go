@@ -18,25 +18,11 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 package main
 
-import (
-	"flag"
-	"log"
+const (
+	version                      = "v0.1"
+	CTLFireabilityFileName       = "CTLFireability.xml"
+	CTLCardinalityFileName       = "CTLCardinality.xml"
+	globalMaxArity           int = 2   // max arity for operators
+	globalMaxAtomSize        int = 5   // max number of transitions/places in any atom
+	globalMaxIntegerConstant int = 100 // max constant to appear in integer comparisons in formulas
 )
-
-func main() {
-
-	inputDirPtr := flag.String("inputs", "INPUTS", "directory where the models can be found")
-	numFormulas := flag.Int("numformulas", 1, "number of formulas to generate")
-	formulaDepth := flag.Int("depth", 2, "max depth of the formulas to generate")
-
-	flag.Parse()
-
-	models := listModels(*inputDirPtr)
-
-	for _, m := range models {
-		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating formulas")
-		m.getids()
-		m.genFormulas(*numFormulas, *formulaDepth)
-	}
-
-}

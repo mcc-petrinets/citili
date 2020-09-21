@@ -17,12 +17,6 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 package main
 
-const (
-	globalMaxArity           int = 2
-	globalMaxAtomSize        int = 5
-	globalMaxIntegerConstant int = 100
-)
-
 type operator struct {
 	name           string
 	minArity       int

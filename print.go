@@ -18,9 +18,28 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+)
 
 const indent string = "   "
+
+// print a set of formulas in a file for a given model
+func (m modelInfo) writeFormulas(formulas []formula, fileName string) {
+
+	f, error := os.Create(filepath.Join(m.directory, fileName))
+	if error != nil {
+		log.Panic(error)
+	}
+
+	f.WriteString(formulas[0].xmlPrint(m, 0))
+
+	f.Sync()
+
+}
 
 // output one formula as xml
 func (f formula) xmlPrint(m modelInfo, num int) (xmlp string) {

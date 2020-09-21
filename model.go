@@ -38,6 +38,7 @@ const (
 
 type modelInfo struct {
 	filePath      string
+	directory     string
 	modelName     string
 	modelType     modelType
 	modelInstance string
@@ -77,7 +78,8 @@ func listModels(inputDir string) []*modelInfo {
 		}
 
 		// directories need to contain a file named model.pnml
-		modelFilePath := filepath.Join(inputDir, fileInfo.Name(), "model.pnml")
+		directory := filepath.Join(inputDir, fileInfo.Name())
+		modelFilePath := filepath.Join(directory, "model.pnml")
 		if _, error = os.Stat(modelFilePath); os.IsNotExist(error) {
 			noModel++
 			continue
@@ -87,6 +89,7 @@ func listModels(inputDir string) []*modelInfo {
 		splitName := strings.Split(fileInfo.Name(), "-")
 		model := modelInfo{
 			filePath:      modelFilePath,
+			directory:     directory,
 			modelName:     splitName[0],
 			modelInstance: splitName[2],
 		}
@@ -133,13 +136,11 @@ func listModels(inputDir string) []*modelInfo {
 	return models
 }
 
-func getids(models []*modelInfo) {
-	for _, m := range models {
-		m.places, m.transitions = pnml.Getptids(m.filePath)
-		log.Print(
-			m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
-			len(m.places), " places and ",
-			len(m.transitions), " transitions.",
-		)
-	}
+func (m *modelInfo) getids() {
+	m.places, m.transitions = pnml.Getptids(m.filePath)
+	log.Print(
+		m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+		len(m.places), " places and ",
+		len(m.transitions), " transitions.",
+	)
 }
