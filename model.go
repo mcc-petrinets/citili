@@ -102,7 +102,7 @@ func listModels(inputDir string) []*modelInfo {
 		}
 
 		// check if the model is the col/pt counterpart of an existing pt/col model
-		instances, nameExists := modelsMap[model.modelName]
+		_, nameExists := modelsMap[model.modelName]
 		if nameExists {
 			twinModel, instanceExists := modelsMap[model.modelName][model.modelInstance]
 			if instanceExists {
@@ -112,18 +112,26 @@ func listModels(inputDir string) []*modelInfo {
 				}
 				twinModel.twinModel = &model
 				model.twinModel = twinModel
+				if model.modelType == col {
+					modelsMap[model.modelName][model.modelInstance] = &model
+				}
 			} else {
-				instances[model.modelInstance] = &model
+				modelsMap[model.modelName][model.modelInstance] = &model
 			}
 		} else {
 			modelsMap[model.modelName] = make(map[string]*modelInfo)
 			modelsMap[model.modelName][model.modelInstance] = &model
 		}
 
-		// better with model address ?
-		models = append(models, &model)
-
+		//models = append(models, &model)
 		log.Print(fileInfo.Name())
+	}
+
+	// all the COL models and all the PT models with no twin are added to the set of models
+	for _, instances := range modelsMap {
+		for _, modelPtr := range instances {
+			models = append(models, modelPtr)
+		}
 	}
 
 	log.Print(
