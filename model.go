@@ -37,14 +37,16 @@ const (
 )
 
 type modelInfo struct {
-	filePath      string
-	directory     string
-	modelName     string
-	modelType     modelType
-	modelInstance string
-	twinModel     *modelInfo
-	places        []string // ids of places
-	transitions   []string // ids of transitions
+	filePath           string
+	directory          string
+	modelName          string
+	modelType          modelType
+	modelInstance      string
+	twinModel          *modelInfo
+	places             []string            // ids of places
+	transitions        []string            // ids of transitions
+	placesMapping      map[string][]string // mapping of ids of places to ids of the twin model
+	transitionsMapping map[string][]string // mapping of ids of transitions
 }
 
 func listModels(inputDir string) []*modelInfo {
@@ -147,31 +149,31 @@ func (m *modelInfo) getids() {
 	}
 }
 
-func (m modelInfo) mapids() map[string][]string {
+func (m *modelInfo) mapids() {
 	// when this function is called, m should always be the PT model
-	// TODO, should be improved to be called only once, not for both CTLFireability and CTLCardinality
-	// maybe the mapping should be part of the modelInfo
-	mapping := make(map[string][]string)
 
-	for _, p := range m.twinModel.places {
-		// will not work if a place of the COL model has an id which is a prefix of another place id of this model
-		for _, pp := range m.places {
-			if strings.HasPrefix(pp, p) {
-				mapping[p] = append(mapping[p], pp)
+	if m.placesMapping == nil || m.transitionsMapping == nil {
+
+		// maybe the mapping should be part of the modelInfo
+		m.placesMapping = make(map[string][]string)
+		m.transitionsMapping = make(map[string][]string)
+
+		for _, p := range m.twinModel.places {
+			// will not work if a place of the COL model has an id which is a prefix of another place id of this model
+			for _, pp := range m.places {
+				if strings.HasPrefix(pp, p) {
+					m.placesMapping[p] = append(m.placesMapping[p], pp)
+				}
+			}
+		}
+
+		for _, t := range m.twinModel.transitions {
+			// will not work if a transition of the COL model has an id which is a prefix of another transition id of this model
+			for _, tt := range m.transitions {
+				if strings.HasPrefix(tt, t) {
+					m.transitionsMapping[t] = append(m.transitionsMapping[t], tt)
+				}
 			}
 		}
 	}
-
-	for _, p := range m.twinModel.transitions {
-		// will not work if a transition of the COL model has an id which is a prefix of another transition id of this model
-		for _, pp := range m.transitions {
-			if strings.HasPrefix(pp, p) {
-				mapping[p] = append(mapping[p], pp)
-			}
-		}
-	}
-
-	// will not work if places and transitions overlap
-
-	return mapping
 }

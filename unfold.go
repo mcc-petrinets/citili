@@ -18,17 +18,17 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 package main
 
-func unfolding(f formula, mapping map[string][]string) formula {
+func (m modelInfo) unfolding(f formula) formula {
 
 	switch f.operator.name {
 	case "A", "E", "not", "and", "or", "G", "F", "X", "U", "leq", "integer-constant":
 		for i := 0; i < len(f.operand); i++ {
-			f.operand[i] = unfolding(f.operand[i], mapping)
+			f.operand[i] = m.unfolding(f.operand[i])
 		}
 	case "is-fireable":
 		unfOperand := make([]formula, 0)
 		for _, t := range f.operand {
-			for _, ut := range mapping[t.operator.name] {
+			for _, ut := range m.transitionsMapping[t.operator.name] {
 				unfOperand = append(
 					unfOperand,
 					formula{operator: operator{name: ut}},
@@ -39,7 +39,7 @@ func unfolding(f formula, mapping map[string][]string) formula {
 	case "token-count":
 		unfOperand := make([]formula, 0)
 		for _, p := range f.operand {
-			for _, up := range mapping[p.operator.name] {
+			for _, up := range m.placesMapping[p.operator.name] {
 				unfOperand = append(
 					unfOperand,
 					formula{operator: operator{name: up}},
