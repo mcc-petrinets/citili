@@ -19,6 +19,35 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 package main
 
 func unfolding(f formula, mapping map[string][]string) formula {
-	// TODO replace each atom by a collection of atoms obtained from the mapping
+
+	switch f.operator.name {
+	case "A", "E", "not", "and", "or", "G", "F", "X", "U", "leq", "integer-constant":
+		for i := 0; i < len(f.operand); i++ {
+			f.operand[i] = unfolding(f.operand[i], mapping)
+		}
+	case "is-fireable":
+		unfOperand := make([]formula, 0)
+		for _, t := range f.operand {
+			for _, ut := range mapping[t.operator.name] {
+				unfOperand = append(
+					unfOperand,
+					formula{operator: operator{name: ut}},
+				)
+			}
+		}
+		f.operand = unfOperand
+	case "token-count":
+		unfOperand := make([]formula, 0)
+		for _, p := range f.operand {
+			for _, up := range mapping[p.operator.name] {
+				unfOperand = append(
+					unfOperand,
+					formula{operator: operator{name: up}},
+				)
+			}
+		}
+		f.operand = unfOperand
+	}
+
 	return f
 }
