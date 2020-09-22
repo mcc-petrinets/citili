@@ -24,6 +24,7 @@ import (
 
 func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int) {
 
+	// should never occur, to remove after test
 	if m.twinModel != nil {
 		if m.modelType != col {
 			log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), Found a corresponding COL model, unfolding needed")
@@ -32,11 +33,11 @@ func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int) {
 	}
 
 	// CTLFireability
-	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating CTLFireability formulas")
+	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating ", numFormulas, " CTLFireability formulas")
 	m.genericGeneration(numFormulas, depth, numUnfold, genCTLFireabilityFormula, CTLFireabilityFileName)
 
 	// CTLCardinality
-	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating CTLCardinality formulas")
+	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating ", numFormulas, " CTLCardinality formulas")
 	m.genericGeneration(numFormulas, depth, numUnfold, genCTLCardinalityFormula, CTLCardinalityFileName)
 
 }
@@ -64,11 +65,13 @@ func (m *modelInfo) genericGeneration(numFormulas, depth, numUnfold int, generat
 	m.mapids()
 
 	// unfolding numUnfold formulas
+	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), unfolding ", numUnfold, " formulas")
 	for i := 0; i < numUnfold; i++ {
 		formulas[i] = m.unfolding(formulas[i])
 	}
 
 	// generating numFormulas - numUnfold formulas
+	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating ", numFormulas-numUnfold, " new formulas")
 	for i := numUnfold; i < numFormulas; i++ {
 		formulas[i] = generation(depth, *m)
 	}
