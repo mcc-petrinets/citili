@@ -162,7 +162,6 @@ func (m *modelInfo) mapids() {
 
 	if m.placesMapping == nil || m.transitionsMapping == nil {
 
-		// maybe the mapping should be part of the modelInfo
 		m.placesMapping = make(map[string][]string)
 		m.transitionsMapping = make(map[string][]string)
 
@@ -173,6 +172,13 @@ func (m *modelInfo) mapids() {
 					m.placesMapping[p] = append(m.placesMapping[p], pp)
 				}
 			}
+			if len(m.placesMapping[p]) == 0 {
+				log.Print(
+					m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+					"WARNING, colored model has a place not mapped to a PT place: ",
+					p,
+				)
+			}
 		}
 
 		for _, t := range m.twinModel.transitions {
@@ -181,6 +187,13 @@ func (m *modelInfo) mapids() {
 				if strings.HasPrefix(tt, t) {
 					m.transitionsMapping[t] = append(m.transitionsMapping[t], tt)
 				}
+			}
+			if len(m.placesMapping[t]) == 0 {
+				log.Print(
+					m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+					"WARNING, colored model has a transition not mapped to a PT transition: ",
+					t,
+				)
 			}
 		}
 	}

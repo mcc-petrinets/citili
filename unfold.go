@@ -20,10 +20,14 @@ package main
 
 func (m modelInfo) unfolding(f formula) formula {
 
+	var ff formula
+	ff.operator = f.operator
+
 	switch f.operator.name {
 	case "A", "E", "not", "and", "or", "G", "F", "X", "U", "leq", "integer-constant":
+		ff.operand = make([]formula, len(f.operand))
 		for i := 0; i < len(f.operand); i++ {
-			f.operand[i] = m.unfolding(f.operand[i])
+			ff.operand[i] = m.unfolding(f.operand[i])
 		}
 	case "is-fireable":
 		unfOperand := make([]formula, 0)
@@ -35,7 +39,7 @@ func (m modelInfo) unfolding(f formula) formula {
 				)
 			}
 		}
-		f.operand = unfOperand
+		ff.operand = unfOperand
 	case "token-count":
 		unfOperand := make([]formula, 0)
 		for _, p := range f.operand {
@@ -46,8 +50,8 @@ func (m modelInfo) unfolding(f formula) formula {
 				)
 			}
 		}
-		f.operand = unfOperand
+		ff.operand = unfOperand
 	}
 
-	return f
+	return ff
 }
