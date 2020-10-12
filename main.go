@@ -37,7 +37,6 @@ func main() {
 	for pos, m := range models {
 		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating formulas")
 		if m != nil {
-			m.getids()
 			m.genFormulas(*numFormulas, *formulaDepth, *numUnfold)
 			models[pos] = nil
 		}

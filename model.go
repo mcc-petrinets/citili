@@ -19,6 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 package main
 
 import (
+	"errors"
 	"io/ioutil"
 	"log"
 	"os"
@@ -37,16 +38,18 @@ const (
 )
 
 type modelInfo struct {
-	filePath           string
-	directory          string
-	modelName          string
-	modelType          modelType
-	modelInstance      string
-	twinModel          *modelInfo
-	places             []string            // ids of places
-	transitions        []string            // ids of transitions
-	placesMapping      map[string][]string // mapping of ids of places to ids of the twin model
-	transitionsMapping map[string][]string // mapping of ids of transitions
+	filePath            string
+	directory           string
+	modelName           string
+	modelType           modelType
+	modelInstance       string
+	twinModel           *modelInfo
+	places              []string            // ids of places to use for generation
+	unmappedPlaces      []string            // ids of places that will not be used for generation
+	transitions         []string            // ids of transitions to use for generation
+	unmappedTransitions []string            // ids of transitions that will not be used for generation
+	placesMapping       map[string][]string // mapping of ids of places to ids of the twin model
+	transitionsMapping  map[string][]string // mapping of ids of transitions
 }
 
 func listModels(inputDir string) []*modelInfo {
@@ -148,7 +151,7 @@ func listModels(inputDir string) []*modelInfo {
 
 func (m *modelInfo) getids() {
 	if m.places == nil || m.transitions == nil {
-		m.places, m.transitions = pnml.Getptids(m.filePath)
+		m.places, m.transitions = pnml.Getptids(m.filePath, false)
 		log.Print(
 			m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
 			len(m.places), " places and ",
@@ -157,7 +160,7 @@ func (m *modelInfo) getids() {
 	}
 }
 
-func (m *modelInfo) mapids() {
+func (m *modelInfo) mapids() error {
 	// when this function is called, m should always be the PT model
 
 	if m.placesMapping == nil || m.transitionsMapping == nil {
@@ -165,6 +168,8 @@ func (m *modelInfo) mapids() {
 		m.placesMapping = make(map[string][]string)
 		m.transitionsMapping = make(map[string][]string)
 
+		unmappedPlaces := make([]string, 0)
+		mappedPlaces := make([]string, 0)
 		for _, p := range m.twinModel.places {
 			// will not work if a place of the COL model has an id which is a prefix of another place id of this model
 			for _, pp := range m.places {
@@ -175,12 +180,27 @@ func (m *modelInfo) mapids() {
 			if len(m.placesMapping[p]) == 0 {
 				log.Print(
 					m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
-					"WARNING, colored model has a place not mapped to a PT place: ",
+					"Warning, colored model has a place not mapped to a PT place: ",
 					p,
 				)
+				unmappedPlaces = append(unmappedPlaces, p)
+			} else {
+				mappedPlaces = append(mappedPlaces, p)
 			}
 		}
 
+		if len(mappedPlaces) == 0 {
+			log.Print(
+				m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+				"Warning, colored model has an empty set of mapped places",
+			)
+			return errors.New("empty set of places")
+		}
+		m.twinModel.places = mappedPlaces
+		m.twinModel.unmappedPlaces = unmappedPlaces
+
+		unmappedTransitions := make([]string, 0)
+		mappedTransitions := make([]string, 0)
 		for _, t := range m.twinModel.transitions {
 			// will not work if a transition of the COL model has an id which is a prefix of another transition id of this model
 			for _, tt := range m.transitions {
@@ -188,13 +208,28 @@ func (m *modelInfo) mapids() {
 					m.transitionsMapping[t] = append(m.transitionsMapping[t], tt)
 				}
 			}
-			if len(m.placesMapping[t]) == 0 {
+			if len(m.transitionsMapping[t]) == 0 {
 				log.Print(
 					m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
-					"WARNING, colored model has a transition not mapped to a PT transition: ",
+					"Warning, colored model has a transition not mapped to a PT transition: ",
 					t,
 				)
+				unmappedTransitions = append(unmappedTransitions, t)
+			} else {
+				mappedTransitions = append(mappedTransitions, t)
 			}
 		}
+
+		if len(mappedTransitions) == 0 {
+			log.Print(
+				m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+				"Warning, colored model has an empty set of mapped transitions",
+			)
+			return errors.New("empty set of transitions")
+		}
+		m.twinModel.transitions = mappedTransitions
+		m.twinModel.unmappedTransitions = unmappedTransitions
 	}
+
+	return nil
 }

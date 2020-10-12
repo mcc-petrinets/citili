@@ -32,6 +32,18 @@ func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int) {
 		}
 	}
 
+	var error error
+	m.getids()
+	if m.twinModel != nil {
+		m.twinModel.getids()
+		error = m.twinModel.mapids()
+	}
+
+	if error != nil {
+		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), Warning: will not unfold formulas: impossible mapping")
+		numUnfold = 0
+	}
+
 	// CTLFireability
 	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating ", numFormulas, " CTLFireability formulas")
 	m.genericGeneration(numFormulas, depth, numUnfold, genCTLFireabilityFormula, CTLFireabilityFileName)
@@ -44,14 +56,17 @@ func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int) {
 
 func (m *modelInfo) genericGeneration(numFormulas, depth, numUnfold int, generation func(int, modelInfo) formula, outFileName string) {
 	// gen numFormulas formulas
+	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating formulas")
 	formulas := make([]formula, numFormulas)
 	for i := 0; i < numFormulas; i++ {
 		formulas[i] = generation(depth, *m)
 	}
 
 	// filter easy formula // TODO
+	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), filtering formulas")
 
 	// write to file
+	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), writting formulas")
 	m.writeFormulas(formulas, outFileName)
 
 	if m.twinModel == nil {
@@ -61,8 +76,8 @@ func (m *modelInfo) genericGeneration(numFormulas, depth, numUnfold int, generat
 	// If there is a corresponding PT model
 	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), Found a corresponding PT model, switching to it")
 	m = m.twinModel
-	m.getids()
-	m.mapids()
+	//m.getids()
+	//m.mapids()
 
 	// unfolding numUnfold formulas
 	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), unfolding ", numUnfold, " formulas")
@@ -77,7 +92,9 @@ func (m *modelInfo) genericGeneration(numFormulas, depth, numUnfold int, generat
 	}
 
 	// filter easy formula // TODO
+	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), filtering formulas")
 
 	// write to file
+	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), writting formulas")
 	m.writeFormulas(formulas, outFileName)
 }
