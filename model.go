@@ -168,15 +168,18 @@ func (m *modelInfo) mapids() error {
 		m.placesMapping = make(map[string][]string)
 		m.transitionsMapping = make(map[string][]string)
 
+		checkPlaces := make([]bool, len(m.places))
 		unmappedPlaces := make([]string, 0)
 		mappedPlaces := make([]string, 0)
 		for _, p := range m.twinModel.places {
 			// will not work if a place of the COL model has an id which is a prefix of another place id of this model
-			for _, pp := range m.places {
+			for i, pp := range m.places {
 				if strings.HasPrefix(pp, p) {
 					m.placesMapping[p] = append(m.placesMapping[p], pp)
+					checkPlaces[i] = true
 				}
 			}
+			// check that p was unfolded into something
 			if len(m.placesMapping[p]) == 0 {
 				log.Print(
 					m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
@@ -188,7 +191,18 @@ func (m *modelInfo) mapids() error {
 				mappedPlaces = append(mappedPlaces, p)
 			}
 		}
-
+		// check that every PT place is the unfolding of something
+		for i, v := range checkPlaces {
+			if !v {
+				log.Print(
+					m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+					"Warning, PT model has a place not unfolded from a COL place: ",
+					m.places[i],
+				)
+			}
+		}
+		// check that the set of places of the COL net that were
+		// unfolded into places of the PT net is not empty
 		if len(mappedPlaces) == 0 {
 			log.Print(
 				m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
@@ -199,15 +213,18 @@ func (m *modelInfo) mapids() error {
 		m.twinModel.places = mappedPlaces
 		m.twinModel.unmappedPlaces = unmappedPlaces
 
+		checkTransitions := make([]bool, len(m.transitions))
 		unmappedTransitions := make([]string, 0)
 		mappedTransitions := make([]string, 0)
 		for _, t := range m.twinModel.transitions {
 			// will not work if a transition of the COL model has an id which is a prefix of another transition id of this model
-			for _, tt := range m.transitions {
+			for i, tt := range m.transitions {
 				if strings.HasPrefix(tt, t) {
 					m.transitionsMapping[t] = append(m.transitionsMapping[t], tt)
+					checkTransitions[i] = true
 				}
 			}
+			// check that t was unfolded into something
 			if len(m.transitionsMapping[t]) == 0 {
 				log.Print(
 					m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
@@ -219,7 +236,18 @@ func (m *modelInfo) mapids() error {
 				mappedTransitions = append(mappedTransitions, t)
 			}
 		}
-
+		// check that every PT transition is the unfolding of something
+		for i, v := range checkTransitions {
+			if !v {
+				log.Print(
+					m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+					"Warning, PT model has a transition not unfolded from a COL transition: ",
+					m.transitions[i],
+				)
+			}
+		}
+		// check that the set of transitions of the COL net that were
+		// unfolded into transitions of the PT net is not empty
 		if len(mappedTransitions) == 0 {
 			log.Print(
 				m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
