@@ -37,8 +37,8 @@ func (m modelInfo) writeFormulas(formulas []formula, fileName string) {
 
 	f.WriteString(
 		fmt.Sprint(
-			"<?xml version\"1.0\"?>\n",
-			"<property-set xmnls=\"http://mcc.lip6.fr/\">\n",
+			"<?xml version=\"1.0\"?>\n",
+			"<property-set xmlns=\"http://mcc.lip6.fr/\">\n",
 		))
 
 	for i := 0; i < len(formulas); i++ {
@@ -174,15 +174,15 @@ func (f formula) asxml(currentIndent string) (xmlf string) {
 			xmlsmall, xmlbig,
 			currentIndent, "</integer-le>\n",
 		)
-	case "token-count":
+	case "tokens-count":
 		xmlp := f.operand[0].asplace(currentIndent + indent)
 		for i := 1; i < len(f.operand); i++ {
 			xmlp = xmlp + f.operand[i].asplace(currentIndent+indent)
 		}
 		xmlf = fmt.Sprint(
-			currentIndent, "<token-count>\n",
+			currentIndent, "<tokens-count>\n",
 			xmlp,
-			currentIndent, "</token-count>\n",
+			currentIndent, "</tokens-count>\n",
 		)
 	case "integer-constant":
 		xmlf = fmt.Sprint(

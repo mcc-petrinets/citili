@@ -2,5 +2,8 @@ citili
 INPUTS/*
 inputs_full/*
 myinputs/*
+updated_inputs/*
+old_inputs/*
+coloredids.patch
 problems.md
 log.log
