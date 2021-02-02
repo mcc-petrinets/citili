@@ -25,12 +25,23 @@ import (
 
 func main() {
 
-	inputDirPtr := flag.String("inputs", "INPUTS", "directory where the models can be found")
-	numFormulas := flag.Int("numformulas", 1, "number of formulas to generate")
-	formulaDepth := flag.Int("depth", 2, "max depth of the formulas to generate")
-	numUnfold := flag.Int("numunfold", 0, "number of formulas to unfold from COL to PT when possible")
+	inputDirPtr := flag.String("inputs", defaultInputDir, "directory where the models can be found")
+	numFormulas := flag.Int("numformulas", defaultNumFormulas, "number of formulas to generate")
+	formulaDepth := flag.Int("depth", defaultFormulaDepth, "max depth of the formulas to generate")
+	numUnfold := flag.Int("numunfold", defaultNumUnfold, "number of formulas to unfold from COL to PT when possible")
 
 	flag.Parse()
+
+	log.Print(
+		"Working with:\n",
+		"\t", "models directory: ", *inputDirPtr, "\n",
+		"\t", "number of formulas: ", *numFormulas, "\n",
+		"\t", "number of unfolded formulas: ", *numUnfold, "\n",
+		"\t", "formula depth: ", *formulaDepth, "\n",
+		"\t", "maximum arity: ", globalMaxArity, "\n",
+		"\t", "maximum atom size: ", globalMaxAtomSize, "\n",
+		"\t", "maximum integer constant: ", globalMaxIntegerConstant, "\n",
+	)
 
 	models := listModels(*inputDirPtr)
 

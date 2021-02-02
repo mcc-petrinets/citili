@@ -40,7 +40,7 @@ func (m modelInfo) unfolding(f formula) formula {
 			}
 		}
 		ff.operand = unfOperand
-	case "token-count":
+	case "tokens-count":
 		unfOperand := make([]formula, 0)
 		for _, p := range f.operand {
 			for _, up := range m.placesMapping[p.operator.name] {
