@@ -94,7 +94,7 @@ func runSMC(model, formulas string, numToFind int) []int {
 	}
 	smcWriter.Close()
 	if err := filterCommand1.Wait(); err != nil {
-		log.Fatal("filter, wait grep 1: ", err)
+		log.Print("WARNING: problem during grep while filtering formulas: ", err)
 	}
 	command1Reader.Close()
 	command1Writer.Close()
