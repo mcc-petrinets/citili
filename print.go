@@ -28,9 +28,14 @@ import (
 const indent string = "   "
 
 // print a set of formulas in a file for a given model
-func (m modelInfo) writeFormulas(formulas []formula, fileName string) {
+func (m modelInfo) writeFormulas(formulas []formula, fileName string, inModelDirectory bool) {
 
-	f, error := os.Create(filepath.Join(m.directory, fileName))
+	filePath := fileName
+	if inModelDirectory {
+		filePath = filepath.Join(m.directory, fileName)
+	}
+
+	f, error := os.Create(filePath)
 	if error != nil {
 		log.Panic(error)
 	}

@@ -29,12 +29,17 @@ const (
 	defaultNumFormulas        int    = 16       // number of formulas to generate
 	defaultNumUnfold          int    = 8        // number of formulas from COL models to unfold for generating formulas for PT models
 	defaultFormulaDepth       int    = 2        // maximum depth of generated formulas
+	defaultMaxFilterTries     int    = 3        // maximum number of call to SMC per model
 	defaultSMCPath            string = "smc.py"
+	defaultSMCTmpFileName     string = "tmp.xml"
 )
 
 var (
 	globalMaxArity           int    = defaultMaxArity
 	globalMaxAtomSize        int    = defaultMaxAtomSize
 	globalMaxIntegerConstant int    = defaultMaxIntegerConstant
+	globalMaxFilterTries     int    = defaultMaxFilterTries
 	globalSMCPath            string = defaultSMCPath
+	globalSMCTmpFileName     string = defaultSMCTmpFileName
+	globalSMCMaxStates       int    = 100
 )
