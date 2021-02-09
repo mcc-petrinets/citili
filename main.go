@@ -30,20 +30,41 @@ func main() {
 	formulaDepth := flag.Int("depth", defaultFormulaDepth, "max depth of the formulas to generate")
 	numUnfold := flag.Int("numunfold", defaultNumUnfold, "number of formulas to unfold from COL to PT when possible")
 
+	globalMaxArity = *flag.Int("maxarity", defaultMaxArity, "maximum arity of operators in formulas")
+	globalMaxAtomSize = *flag.Int("maxatomsize", defaultMaxAtomSize, "maximum number of transitions/places used in a single atom")
+	globalMaxIntegerConstant = *flag.Int("maxintegerconstant", defaultMaxIntegerConstant, "maximum integer constant appearing in integer comparisons in formulas")
+	globalMaxFilterTries = *flag.Int("maxfiltertries", defaultMaxFilterTries, "maximum number of times the formulas filter should be called on a given model, each call tries to filter among filtersetsize formulas")
+	globalFilterSetSize = *flag.Int("filtersetsize", defaultFilterSetSize, "number of formulas to generate for each round of filtering")
+	globalSMCPath = *flag.String("smcpath", defaultSMCPath, "path to SMC, the simple model checker used for filtering formulas")
+	globalSMCTmpFileName = *flag.String("smctmpfile", defaultSMCTmpFileName, "path to the file that will be used to store formulas to be given to SMC")
+	globalSMCMaxStates = *flag.Int("smcmaxstates", defaultSMCMaxStates, "number of states that SMC should explore before considering that a formula is not easy")
+	globalSMClogfile = *flag.String("smclogfile", defaultSMClogfile, "path to the file where SMC log should be stored")
+
 	flag.Parse()
 
 	log.Print(
 		"Working with:\n",
 		"\t", "models directory: ", *inputDirPtr, "\n",
-		"\t", "number of formulas: ", *numFormulas, "\n",
-		"\t", "number of unfolded formulas: ", *numUnfold, "\n",
-		"\t", "formula depth: ", *formulaDepth, "\n",
-		"\t", "maximum arity: ", globalMaxArity, "\n",
-		"\t", "maximum atom size: ", globalMaxAtomSize, "\n",
-		"\t", "maximum integer constant: ", globalMaxIntegerConstant, "\n",
+		"\t", "number of generated formulas per model: ", *numFormulas, "\n",
+		"\t", "number of unfolded formulas per COL/PT cuple: ", *numUnfold, "\n",
+		"Formulas characteristics:\n",
+		"\t", "maximum depth: ", *formulaDepth, "\n",
+		"\t", "maximum arity of operator: ", globalMaxArity, "\n",
+		"\t", "maximum number of transitions/places per atom: ", globalMaxAtomSize, "\n",
+		"\t", "maximum integer constant used in comparisons: ", globalMaxIntegerConstant, "\n",
+		"Formulas filtering:\n",
+		"\t", "number of filtering rounds per model: ", globalMaxFilterTries, "\n",
+		"\t", "number of generated formulas at each filtering round: ", globalFilterSetSize, "\n",
+		"\t", "tmp file location: ", globalSMCTmpFileName, "\n",
+		"SMC configuration:\n",
+		"\t", "path: ", globalSMCPath, "\n",
+		"\t", "log file: ", globalSMClogfile, "\n",
+		"\t", "maximum number of states to consider: ", globalSMCMaxStates, "\n",
 	)
 
 	models := listModels(*inputDirPtr)
+
+	initOperators()
 
 	for pos, m := range models {
 		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating formulas")

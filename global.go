@@ -19,7 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 package main
 
 const (
-	version                   string = "v0.1"
+	version                   string = "v0.2"
 	CTLFireabilityFileName    string = "CTLFireability.xml"
 	CTLCardinalityFileName    string = "CTLCardinality.xml"
 	defaultMaxArity           int    = 2        // max arity for operators
@@ -30,16 +30,21 @@ const (
 	defaultNumUnfold          int    = 8        // number of formulas from COL models to unfold for generating formulas for PT models
 	defaultFormulaDepth       int    = 2        // maximum depth of generated formulas
 	defaultMaxFilterTries     int    = 3        // maximum number of call to SMC per model
+	defaultFilterSetSize      int    = 16       // number of formula to generate for one round of SMC filtering
 	defaultSMCPath            string = "smc.py"
 	defaultSMCTmpFileName     string = "tmp.xml"
+	defaultSMClogfile         string = "smclog"
+	defaultSMCMaxStates       int    = 2000
 )
 
 var (
-	globalMaxArity           int    = defaultMaxArity
-	globalMaxAtomSize        int    = defaultMaxAtomSize
-	globalMaxIntegerConstant int    = defaultMaxIntegerConstant
-	globalMaxFilterTries     int    = defaultMaxFilterTries
-	globalSMCPath            string = defaultSMCPath
-	globalSMCTmpFileName     string = defaultSMCTmpFileName
-	globalSMCMaxStates       int    = 100
+	globalMaxArity           int
+	globalMaxAtomSize        int
+	globalMaxIntegerConstant int
+	globalMaxFilterTries     int
+	globalFilterSetSize      int
+	globalSMCPath            string
+	globalSMCTmpFileName     string
+	globalSMCMaxStates       int
+	globalSMClogfile         string
 )

@@ -48,13 +48,17 @@ func runSMC(model, formulas string, numToFind int) []int {
 	smcMaxStates := fmt.Sprint("--max-states=", globalSMCMaxStates)
 	smcStopAfter := fmt.Sprint("--mcc15-stop-after=", numToFind)
 	smcCommand := exec.Command("python", globalSMCPath, "--use10", smcMaxStates, smcStopAfter, model, formulas)
+	logSMCCommand := exec.Command("tee", "-a", globalSMClogfile)
 	filterCommand1 := exec.Command("grep", "-v", "^smc:")
 	filterCommand2 := exec.Command("grep", "?")
 	cutCommand := exec.Command("cut", "-d-", "-f5")
-	command1Reader, smcWriter := io.Pipe()
+	logReader, smcWriter := io.Pipe()
+	command1Reader, logWriter := io.Pipe()
 	command2Reader, command1Writer := io.Pipe()
 	cutCommandReader, command2Writer := io.Pipe()
 	smcCommand.Stdout = smcWriter
+	logSMCCommand.Stdin = logReader
+	logSMCCommand.Stdout = logWriter
 	filterCommand1.Stdin = command1Reader
 	filterCommand1.Stdout = command1Writer
 	filterCommand2.Stdin = command2Reader
@@ -62,44 +66,62 @@ func runSMC(model, formulas string, numToFind int) []int {
 	cutCommand.Stdin = cutCommandReader
 	stdout, err := cutCommand.StdoutPipe()
 	if err != nil {
-		log.Fatal("filter, StdoutPipe(): ", err)
+		log.Print("ERROR: filter, StdoutPipe(): ", err)
+		return tokeep
 	}
 	smcCommandOutput := bufio.NewReader(stdout)
 	stderr, err := smcCommand.StderrPipe()
 	if err != nil {
-		log.Fatal("filter, StderrPipe(): ", err)
+		log.Print("ERROR: filter, StderrPipe(): ", err)
+		return tokeep
 	}
 	smcCommandError := bufio.NewReader(stderr)
 	if err := smcCommand.Start(); err != nil {
-		log.Fatal("filter, start SMC: ", err)
+		log.Print("ERROR: filter, start SMC: ", err)
+		return tokeep
+	}
+	if err := logSMCCommand.Start(); err != nil {
+		log.Print("ERROR: filter, start tee: ", err)
+		return tokeep
 	}
 	if err := filterCommand1.Start(); err != nil {
-		log.Fatal("filter, start grep 1: ", err)
+		log.Print("ERROR: filter, start grep 1: ", err)
+		return tokeep
 	}
 	if err := filterCommand2.Start(); err != nil {
-		log.Fatal("filter, start grep 2: ", err)
+		log.Print("ERROR: filter, start grep 2: ", err)
+		return tokeep
 	}
 	if err := cutCommand.Start(); err != nil {
-		log.Fatal("filter, start cut: ", err)
+		log.Print("ERROR: filter, start cut: ", err)
+		return tokeep
 	}
 	res, err := smcCommandError.ReadString('\n')
 	for ; err == nil; res, err = smcCommandError.ReadString('\n') {
-		log.Print("SMC error: ", res)
+		log.Print("SMC ERROR: ", res)
 	}
 	if err != io.EOF {
-		log.Fatal("filter, stderr reading error: ", err)
+		log.Print("ERROR: filter, stderr reading error: ", err)
+		return tokeep
 	}
 	if err := smcCommand.Wait(); err != nil {
-		log.Fatal("filter, wait SMC: ", err)
+		log.Print("ERROR: filter, wait SMC: ", err)
+		return tokeep
 	}
 	smcWriter.Close()
+	if err := logSMCCommand.Wait(); err != nil {
+		log.Print("ERROR: filter, wait tee: ", err)
+		return tokeep
+	}
+	logReader.Close()
+	logWriter.Close()
 	if err := filterCommand1.Wait(); err != nil {
 		log.Print("WARNING: problem during grep while filtering formulas: ", err)
 	}
 	command1Reader.Close()
 	command1Writer.Close()
 	if err := filterCommand2.Wait(); err != nil {
-		log.Print("WARNING: problem during grep while filtering formulas: ", err)
+		log.Print("WARNING: problem during grep while filtering formulas (probably, no difficult formula was found): ", err)
 	}
 	command2Reader.Close()
 	command2Writer.Close()
@@ -107,15 +129,18 @@ func runSMC(model, formulas string, numToFind int) []int {
 	for ; err == nil; res, err = smcCommandOutput.ReadString('\n') {
 		v, err := strconv.Atoi(strings.TrimSuffix(res, "\n"))
 		if err != nil {
-			log.Fatal("filter, atoi: ", err)
+			log.Print("ERROR: filter, atoi: ", err)
+		} else {
+			tokeep = append(tokeep, v)
 		}
-		tokeep = append(tokeep, v)
 	}
 	if err != io.EOF {
-		log.Fatal("filter, stdout reading error: ", err)
+		log.Print("ERROR: filter, stdout reading error: ", err)
+		return tokeep
 	}
 	if err := cutCommand.Wait(); err != nil {
-		log.Fatal("filter, wait cut: ", err)
+		log.Print("ERROR: filter, wait cut: ", err)
+		return tokeep
 	}
 	cutCommandReader.Close()
 	return tokeep

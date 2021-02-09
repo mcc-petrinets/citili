@@ -95,8 +95,8 @@ func (m *modelInfo) genericGeneration(numFormulas, depth int, generation func(in
 	for numFound < numFormulas && filterRounds < globalMaxFilterTries {
 		// gen numFormulas formulas
 		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating formulas")
-		tmpFormulas := make([]formula, numFormulas)
-		for i := 0; i < numFormulas; i++ {
+		tmpFormulas := make([]formula, globalFilterSetSize)
+		for i := 0; i < globalFilterSetSize; i++ {
 			tmpFormulas[i] = generation(depth, *m)
 		}
 
