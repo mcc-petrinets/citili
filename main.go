@@ -27,20 +27,30 @@ func main() {
 
 	inputDirPtr := flag.String("inputs", defaultInputDir, "directory where the models can be found")
 	numFormulas := flag.Int("numformulas", defaultNumFormulas, "number of formulas to generate")
-	formulaDepth := flag.Int("depth", defaultFormulaDepth, "max depth of the formulas to generate")
+	formulaDepth := flag.Int("formuladepth", defaultFormulaDepth, "max depth of the formulas to generate")
 	numUnfold := flag.Int("numunfold", defaultNumUnfold, "number of formulas to unfold from COL to PT when possible")
 
-	globalMaxArity = *flag.Int("maxarity", defaultMaxArity, "maximum arity of operators in formulas")
-	globalMaxAtomSize = *flag.Int("maxatomsize", defaultMaxAtomSize, "maximum number of transitions/places used in a single atom")
-	globalMaxIntegerConstant = *flag.Int("maxintegerconstant", defaultMaxIntegerConstant, "maximum integer constant appearing in integer comparisons in formulas")
-	globalMaxFilterTries = *flag.Int("maxfiltertries", defaultMaxFilterTries, "maximum number of times the formulas filter should be called on a given model, each call tries to filter among filtersetsize formulas")
-	globalFilterSetSize = *flag.Int("filtersetsize", defaultFilterSetSize, "number of formulas to generate for each round of filtering")
-	globalSMCPath = *flag.String("smcpath", defaultSMCPath, "path to SMC, the simple model checker used for filtering formulas")
-	globalSMCTmpFileName = *flag.String("smctmpfile", defaultSMCTmpFileName, "path to the file that will be used to store formulas to be given to SMC")
-	globalSMCMaxStates = *flag.Int("smcmaxstates", defaultSMCMaxStates, "number of states that SMC should explore before considering that a formula is not easy")
-	globalSMClogfile = *flag.String("smclogfile", defaultSMClogfile, "path to the file where SMC log should be stored")
+	tmpMaxArity := flag.Int("maxarity", defaultMaxArity, "maximum arity of operators in formulas")
+	tmpMaxAtomSize := flag.Int("maxatomsize", defaultMaxAtomSize, "maximum number of transitions/places used in a single atom")
+	tmpMaxIntegerConstant := flag.Int("maxintegerconstant", defaultMaxIntegerConstant, "maximum integer constant appearing in integer comparisons in formulas")
+	tmpMaxFilterTries := flag.Int("maxfiltertries", defaultMaxFilterTries, "maximum number of times the formulas filter should be called on a given model, each call tries to filter among filtersetsize formulas")
+	tmpFilterSetSize := flag.Int("filtersetsize", defaultFilterSetSize, "number of formulas to generate for each round of filtering")
+	tmpSMCPath := flag.String("smcpath", defaultSMCPath, "path to SMC, the simple model checker used for filtering formulas")
+	tmpSMCTmpFileName := flag.String("smctmpfile", defaultSMCTmpFileName, "path to the file that will be used to store formulas to be given to SMC")
+	tmpSMCMaxStates := flag.Int("smcmaxstates", defaultSMCMaxStates, "number of states that SMC should explore before considering that a formula is not easy")
+	tmpSMClogfile := flag.String("smclogfile", defaultSMClogfile, "path to the file where SMC log should be stored")
 
 	flag.Parse()
+
+	globalMaxArity = *tmpMaxArity
+	globalMaxAtomSize = *tmpMaxAtomSize
+	globalMaxIntegerConstant = *tmpMaxIntegerConstant
+	globalMaxFilterTries = *tmpMaxFilterTries
+	globalFilterSetSize = *tmpFilterSetSize
+	globalSMCPath = *tmpSMCPath
+	globalSMCTmpFileName = *tmpSMCTmpFileName
+	globalSMCMaxStates = *tmpSMCMaxStates
+	globalSMClogfile = *tmpSMClogfile
 
 	log.Print(
 		"Working with:\n",
