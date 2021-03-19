@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func (m *modelInfo) filter(formulas []formula, numToFind int) []int {
+func (m *modelInfo) filter(formulas []formula, numToFind int, canUnfold bool, logger *log.Logger) []int {
 
 	// model
 	modelPath := m.filePath
@@ -19,7 +19,16 @@ func (m *modelInfo) filter(formulas []formula, numToFind int) []int {
 	if m.modelType == col {
 		// if colored with no twin we can do nothing, just keep the formulas
 		if m.twinModel == nil {
-			log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), COL model without PT equivalent, cannot filter formulas")
+			logger.Print("COL model without PT equivalent, cannot filter formulas")
+			res := make([]int, len(formulas))
+			for i := 0; i < len(formulas); i++ {
+				res[i] = i
+			}
+			return res
+		}
+		// if colored with twin but no correct mapping to PT
+		if !canUnfold {
+			logger.Print("COL model with PT equivalent but that cannot be unfold (impossible mapping), cannot filter formulas")
 			res := make([]int, len(formulas))
 			for i := 0; i < len(formulas); i++ {
 				res[i] = i
@@ -38,12 +47,12 @@ func (m *modelInfo) filter(formulas []formula, numToFind int) []int {
 	m.writeFormulas(formulas, globalSMCTmpFileName, false)
 
 	// smc run
-	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), running SMC on model ", modelPath, " with formulas file ", globalSMCTmpFileName)
+	logger.Print("running SMC on model ", modelPath, " with formulas file ", globalSMCTmpFileName)
 
-	return runSMC(modelPath, globalSMCTmpFileName, numToFind)
+	return runSMC(modelPath, globalSMCTmpFileName, numToFind, logger)
 }
 
-func runSMC(model, formulas string, numToFind int) []int {
+func runSMC(model, formulas string, numToFind int, logger *log.Logger) []int {
 	tokeep := make([]int, 0)
 	smcMaxStates := fmt.Sprint("--max-states=", globalSMCMaxStates)
 	smcStopAfter := fmt.Sprint("--mcc15-stop-after=", numToFind)
@@ -66,62 +75,62 @@ func runSMC(model, formulas string, numToFind int) []int {
 	cutCommand.Stdin = cutCommandReader
 	stdout, err := cutCommand.StdoutPipe()
 	if err != nil {
-		log.Print("ERROR: filter, StdoutPipe(): ", err)
+		logger.Print("ERROR: filter, StdoutPipe(): ", err)
 		return tokeep
 	}
 	smcCommandOutput := bufio.NewReader(stdout)
 	stderr, err := smcCommand.StderrPipe()
 	if err != nil {
-		log.Print("ERROR: filter, StderrPipe(): ", err)
+		logger.Print("ERROR: filter, StderrPipe(): ", err)
 		return tokeep
 	}
 	smcCommandError := bufio.NewReader(stderr)
 	if err := smcCommand.Start(); err != nil {
-		log.Print("ERROR: filter, start SMC: ", err)
+		logger.Print("ERROR: filter, start SMC: ", err)
 		return tokeep
 	}
 	if err := logSMCCommand.Start(); err != nil {
-		log.Print("ERROR: filter, start tee: ", err)
+		logger.Print("ERROR: filter, start tee: ", err)
 		return tokeep
 	}
 	if err := filterCommand1.Start(); err != nil {
-		log.Print("ERROR: filter, start grep 1: ", err)
+		logger.Print("ERROR: filter, start grep 1: ", err)
 		return tokeep
 	}
 	if err := filterCommand2.Start(); err != nil {
-		log.Print("ERROR: filter, start grep 2: ", err)
+		logger.Print("ERROR: filter, start grep 2: ", err)
 		return tokeep
 	}
 	if err := cutCommand.Start(); err != nil {
-		log.Print("ERROR: filter, start cut: ", err)
+		logger.Print("ERROR: filter, start cut: ", err)
 		return tokeep
 	}
 	res, err := smcCommandError.ReadString('\n')
 	for ; err == nil; res, err = smcCommandError.ReadString('\n') {
-		log.Print("SMC ERROR: ", res)
+		logger.Print("SMC ERROR: ", res)
 	}
 	if err != io.EOF {
-		log.Print("ERROR: filter, stderr reading error: ", err)
+		logger.Print("ERROR: filter, stderr reading error: ", err)
 		return tokeep
 	}
 	if err := smcCommand.Wait(); err != nil {
-		log.Print("ERROR: filter, wait SMC: ", err)
+		logger.Print("ERROR: filter, wait SMC: ", err)
 		return tokeep
 	}
 	smcWriter.Close()
 	if err := logSMCCommand.Wait(); err != nil {
-		log.Print("ERROR: filter, wait tee: ", err)
+		logger.Print("ERROR: filter, wait tee: ", err)
 		return tokeep
 	}
 	logReader.Close()
 	logWriter.Close()
 	if err := filterCommand1.Wait(); err != nil {
-		log.Print("WARNING: problem during grep while filtering formulas: ", err)
+		logger.Print("WARNING: problem during grep while filtering formulas: ", err)
 	}
 	command1Reader.Close()
 	command1Writer.Close()
 	if err := filterCommand2.Wait(); err != nil {
-		log.Print("WARNING: problem during grep while filtering formulas (probably, no difficult formula was found): ", err)
+		logger.Print("WARNING: problem during grep while filtering formulas (probably, no difficult formula was found): ", err)
 	}
 	command2Reader.Close()
 	command2Writer.Close()
@@ -129,17 +138,17 @@ func runSMC(model, formulas string, numToFind int) []int {
 	for ; err == nil; res, err = smcCommandOutput.ReadString('\n') {
 		v, err := strconv.Atoi(strings.TrimSuffix(res, "\n"))
 		if err != nil {
-			log.Print("ERROR: filter, atoi: ", err)
+			logger.Print("ERROR: filter, atoi: ", err)
 		} else {
 			tokeep = append(tokeep, v)
 		}
 	}
 	if err != io.EOF {
-		log.Print("ERROR: filter, stdout reading error: ", err)
+		logger.Print("ERROR: filter, stdout reading error: ", err)
 		return tokeep
 	}
 	if err := cutCommand.Wait(); err != nil {
-		log.Print("ERROR: filter, wait cut: ", err)
+		logger.Print("ERROR: filter, wait cut: ", err)
 		return tokeep
 	}
 	cutCommandReader.Close()

@@ -20,7 +20,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"os"
+	"runtime"
 )
 
 func main() {
@@ -40,6 +43,8 @@ func main() {
 	tmpSMCMaxStates := flag.Int("smcmaxstates", defaultSMCMaxStates, "number of states that SMC should explore before considering that a formula is not easy")
 	tmpSMClogfile := flag.String("smclogfile", defaultSMClogfile, "path to the file where SMC log should be stored")
 
+	numProc := flag.Int("numproc", defaultNumProc, "number of cores available for generation")
+
 	flag.Parse()
 
 	globalMaxArity = *tmpMaxArity
@@ -54,6 +59,7 @@ func main() {
 
 	log.Print(
 		"Working with:\n",
+		"\t", "cores: ", *numProc, "\n",
 		"\t", "models directory: ", *inputDirPtr, "\n",
 		"\t", "number of generated formulas per model: ", *numFormulas, "\n",
 		"\t", "number of unfolded formulas per COL/PT cuple: ", *numUnfold, "\n",
@@ -72,16 +78,47 @@ func main() {
 		"\t", "maximum number of states to consider: ", globalSMCMaxStates, "\n",
 	)
 
+	// set the number of cores to use
+	oldNumProc := runtime.GOMAXPROCS(*numProc)
+	log.Print("Switching from ", oldNumProc, " cores (default) to ", *numProc, " cores")
+
 	models := listModels(*inputDirPtr)
 
 	initOperators()
 
-	for pos, m := range models {
-		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating formulas")
-		if m != nil {
-			m.genFormulas(*numFormulas, *formulaDepth, *numUnfold)
-			models[pos] = nil
+	routineNum := 0
+	doneChan := make(chan int, *numProc)
+	for pos := range models {
+		availableRoutineNum := routineNum
+		if routineNum >= *numProc {
+			availableRoutineNum = <-doneChan
+		} else {
+			routineNum++
 		}
+		go handleModel(pos, models, *numFormulas, *formulaDepth, *numUnfold, availableRoutineNum, doneChan)
 	}
 
+	for routineNum > 0 {
+		<-doneChan
+		routineNum--
+	}
+
+}
+
+func handleModel(pos int, models []*modelInfo, numFormulas, formulaDepth, numUnfold int, routineNum int, doneChan chan int) {
+	m := models[pos]
+
+	logger := log.New(
+		os.Stderr,
+		fmt.Sprint("[goroutine-", routineNum, "] (", m.modelName, "-", m.modelInstance, ") "),
+		log.LstdFlags,
+	)
+
+	logger.Print("Starting goroutine")
+
+	logger.Print("generating formulas")
+	m.genFormulas(numFormulas, formulaDepth, numUnfold, logger)
+	models[pos] = nil
+	logger.Print("Ending goroutine")
+	doneChan <- routineNum
 }

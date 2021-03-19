@@ -35,6 +35,7 @@ const (
 	defaultSMCTmpFileName     string = "tmp.xml"
 	defaultSMClogfile         string = "smclog"
 	defaultSMCMaxStates       int    = 2000
+	defaultNumProc            int    = 1 // number of cores to use for generating formulas
 )
 
 var (

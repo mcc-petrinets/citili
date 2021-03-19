@@ -22,45 +22,52 @@ import (
 	"log"
 )
 
-func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int) {
+func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int, logger *log.Logger) {
 
 	// should never occur, to remove after test
 	if m.twinModel != nil {
 		if m.modelType != col {
-			log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), Found a corresponding COL model, unfolding needed")
+			logger.Print("Found a corresponding COL model, unfolding needed")
 			return
 		}
 	}
 
 	var error error
-	m.getids()
+	m.getids(logger)
 	if m.twinModel != nil {
-		m.twinModel.getids()
-		error = m.twinModel.mapids()
+		m.twinModel.getids(logger)
+		error = m.twinModel.mapids(logger)
 	}
 
+	canUnfold := true
 	if error != nil {
-		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), Warning: will not unfold formulas: impossible mapping")
-		numUnfold = 0
+		logger.Print("Warning: will not unfold formulas: impossible mapping")
+		canUnfold = false
 	}
 
 	// CTLFireability
-	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating ", numFormulas, " CTLFireability formulas")
-	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, genCTLFireabilityFormula, CTLFireabilityFileName)
+	logger.Print("Generating ", numFormulas, " CTLFireability formulas")
+	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genCTLFireabilityFormula, CTLFireabilityFileName, logger)
 
 	// CTLCardinality
-	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating ", numFormulas, " CTLCardinality formulas")
-	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, genCTLCardinalityFormula, CTLCardinalityFileName)
+	logger.Print("Generating ", numFormulas, " CTLCardinality formulas")
+	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genCTLCardinalityFormula, CTLCardinalityFileName, logger)
 
 }
 
-func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold int, generation func(int, modelInfo) formula, outFileName string) {
+func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold int, canUnfold bool, generation func(int, modelInfo) formula, outFileName string, logger *log.Logger) {
+
+	modelType := "COL"
+	if m.modelType != col {
+		modelType = "PT"
+	}
+	logger.Print("Working on ", modelType, " model")
 
 	// gen numFormulas formulas
-	formulas := m.genericGeneration(numFormulas, depth, generation)
+	formulas := m.genericGeneration(numFormulas, depth, canUnfold, generation, logger)
 
 	// write to file
-	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), writting formulas")
+	logger.Print("Writting formulas")
 	m.writeFormulas(formulas, outFileName, true)
 
 	if m.twinModel == nil {
@@ -68,41 +75,44 @@ func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold in
 	}
 
 	// If there is a corresponding PT model
-	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), Found a corresponding PT model, switching to it")
+	logger.Print("Found a corresponding PT model, switching to it")
 	m = m.twinModel
 
-	// unfolding numUnfold formulas
-	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), unfolding ", numUnfold, " formulas")
+	// unfolding numUnfold formulas if possible
+	if !canUnfold {
+		numUnfold = 0
+	}
+	logger.Print("Unfolding ", numUnfold, " formulas")
 	for i := 0; i < numUnfold; i++ {
 		formulas[i] = m.unfolding(formulas[i])
 	}
 
 	// generating numFormulas - numUnfold formulas
-	newFormulas := m.genericGeneration(numFormulas-numUnfold, depth, generation)
+	newFormulas := m.genericGeneration(numFormulas-numUnfold, depth, canUnfold, generation, logger)
 	for i := numUnfold; i < numFormulas; i++ {
 		formulas[i] = newFormulas[i-numUnfold]
 	}
 
 	// write to file
-	log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), writting formulas")
+	logger.Print("Writting formulas")
 	m.writeFormulas(formulas, outFileName, true)
 }
 
-func (m *modelInfo) genericGeneration(numFormulas, depth int, generation func(int, modelInfo) formula) []formula {
+func (m *modelInfo) genericGeneration(numFormulas, depth int, canUnfold bool, generation func(int, modelInfo) formula, logger *log.Logger) []formula {
 	numFound := 0
 	filterRounds := 0
 	formulas := make([]formula, numFormulas)
 	for numFound < numFormulas && filterRounds < globalMaxFilterTries {
 		// gen numFormulas formulas
-		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), generating formulas")
+		logger.Print("Generating formulas")
 		tmpFormulas := make([]formula, globalFilterSetSize)
 		for i := 0; i < globalFilterSetSize; i++ {
 			tmpFormulas[i] = generation(depth, *m)
 		}
 
 		// filter out easy formula
-		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), filtering formulas")
-		toKeep := m.filter(tmpFormulas, numFormulas-numFound)
+		logger.Print("Filtering formulas")
+		toKeep := m.filter(tmpFormulas, numFormulas-numFound, canUnfold, logger)
 		for i := 0; i < len(toKeep) && numFound < numFormulas; i++ {
 			formulas[numFound] = tmpFormulas[toKeep[i]]
 			numFound++
@@ -111,12 +121,12 @@ func (m *modelInfo) genericGeneration(numFormulas, depth int, generation func(in
 		filterRounds++
 
 		// display info on generation
-		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), round ", filterRounds, ", kept ", len(toKeep), " formulas, ", numFormulas-numFound, " to go")
+		logger.Print("Round ", filterRounds, ", kept ", len(toKeep), " formulas, ", numFormulas-numFound, " to go")
 	}
 
 	// if not enough formulas, complete with completely random ones
 	if numFound < numFormulas {
-		log.Print(m.modelName, " (", m.modelInstance, ", ", m.modelType, "), found only ", numFound, " formulas, will add random ones to go up to ", numFormulas)
+		logger.Print("Found only ", numFound, " formulas, will add random ones to go up to ", numFormulas)
 		for ; numFound < numFormulas; numFound++ {
 			formulas[numFound] = generation(depth, *m)
 		}

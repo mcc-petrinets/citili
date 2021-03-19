@@ -149,18 +149,17 @@ func listModels(inputDir string) []*modelInfo {
 	return models
 }
 
-func (m *modelInfo) getids() {
+func (m *modelInfo) getids(logger *log.Logger) {
 	if m.places == nil || m.transitions == nil {
 		m.places, m.transitions = pnml.Getptids(m.filePath, false)
-		log.Print(
-			m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+		logger.Print(
 			len(m.places), " places and ",
 			len(m.transitions), " transitions.",
 		)
 	}
 }
 
-func (m *modelInfo) mapids() error {
+func (m *modelInfo) mapids(logger *log.Logger) error {
 	// when this function is called, m should always be the PT model
 
 	if m.placesMapping == nil || m.transitionsMapping == nil {
@@ -181,8 +180,7 @@ func (m *modelInfo) mapids() error {
 			}
 			// check that p was unfolded into something
 			if len(m.placesMapping[p]) == 0 {
-				log.Print(
-					m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+				logger.Print(
 					"Warning, colored model has a place not mapped to a PT place: ",
 					p,
 				)
@@ -194,8 +192,7 @@ func (m *modelInfo) mapids() error {
 		// check that every PT place is the unfolding of something
 		for i, v := range checkPlaces {
 			if !v {
-				log.Print(
-					m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+				logger.Print(
 					"Warning, PT model has a place not unfolded from a COL place: ",
 					m.places[i],
 				)
@@ -204,8 +201,7 @@ func (m *modelInfo) mapids() error {
 		// check that the set of places of the COL net that were
 		// unfolded into places of the PT net is not empty
 		if len(mappedPlaces) == 0 {
-			log.Print(
-				m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+			logger.Print(
 				"Warning, colored model has an empty set of mapped places",
 			)
 			return errors.New("empty set of places")
@@ -226,8 +222,7 @@ func (m *modelInfo) mapids() error {
 			}
 			// check that t was unfolded into something
 			if len(m.transitionsMapping[t]) == 0 {
-				log.Print(
-					m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+				logger.Print(
 					"Warning, colored model has a transition not mapped to a PT transition: ",
 					t,
 				)
@@ -239,8 +234,7 @@ func (m *modelInfo) mapids() error {
 		// check that every PT transition is the unfolding of something
 		for i, v := range checkTransitions {
 			if !v {
-				log.Print(
-					m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+				logger.Print(
 					"Warning, PT model has a transition not unfolded from a COL transition: ",
 					m.transitions[i],
 				)
@@ -249,8 +243,7 @@ func (m *modelInfo) mapids() error {
 		// check that the set of transitions of the COL net that were
 		// unfolded into transitions of the PT net is not empty
 		if len(mappedTransitions) == 0 {
-			log.Print(
-				m.modelName, " (", m.modelInstance, ", ", m.modelType, "): ",
+			logger.Print(
 				"Warning, colored model has an empty set of mapped transitions",
 			)
 			return errors.New("empty set of transitions")
