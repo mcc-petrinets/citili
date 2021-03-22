@@ -28,7 +28,7 @@ import (
 const indent string = "   "
 
 // print a set of formulas in a file for a given model
-func (m modelInfo) writeFormulas(formulas []formula, fileName string, inModelDirectory bool) {
+func (m modelInfo) writeFormulas(formulas []formula, fileName string, formulaType string, inModelDirectory bool) {
 
 	filePath := fileName
 	if inModelDirectory {
@@ -47,7 +47,7 @@ func (m modelInfo) writeFormulas(formulas []formula, fileName string, inModelDir
 		))
 
 	for i := 0; i < len(formulas); i++ {
-		f.WriteString(formulas[i].xmlPrint(m, i))
+		f.WriteString(formulas[i].xmlPrint(m, i, formulaType))
 	}
 
 	f.WriteString(
@@ -60,15 +60,15 @@ func (m modelInfo) writeFormulas(formulas []formula, fileName string, inModelDir
 }
 
 // output one formula as xml
-func (f formula) xmlPrint(m modelInfo, num int) (xmlp string) {
+func (f formula) xmlPrint(m modelInfo, num int, formulaType string) (xmlp string) {
 	kind := "COL"
 	if m.modelType != col {
 		kind = "PT"
 	}
 
 	fid := fmt.Sprintf(
-		"%s-%s-%s-%2.2d",
-		m.modelName, kind, m.modelInstance, num,
+		"%s-%s-%s-%s-%2.2d",
+		m.modelName, kind, m.modelInstance, formulaType, num,
 	)
 
 	xmlf := f.asxml(indent + indent + indent)

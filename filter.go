@@ -44,7 +44,7 @@ func (m *modelInfo) filter(formulas []formula, numToFind int, canUnfold bool, lo
 		// change the model accordingly
 		modelPath = m.twinModel.filePath
 	}
-	m.writeFormulas(formulas, globalSMCTmpFileName, false)
+	m.writeFormulas(formulas, globalSMCTmpFileName, "ForFiltering", false)
 
 	// smc run
 	logger.Print("running SMC on model ", modelPath, " with formulas file ", globalSMCTmpFileName)
