@@ -11,3 +11,4 @@ smc.py
 smclog
 tmp.xml
 INPUTS.tar.gz
+logs/*

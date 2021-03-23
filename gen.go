@@ -47,15 +47,15 @@ func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int, logger *log.L
 
 	// CTLFireability
 	logger.Print("Generating ", numFormulas, " CTLFireability formulas")
-	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genCTLFireabilityFormula, CTLFireabilityFileName, "CTLFireability", logger)
+	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genCTLFireabilityFormula, CTLFireabilityXMLFileName, CTLFireabilityHRFileName, "CTLFireability", logger)
 
 	// CTLCardinality
 	logger.Print("Generating ", numFormulas, " CTLCardinality formulas")
-	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genCTLCardinalityFormula, CTLCardinalityFileName, "CTLCardinality", logger)
+	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genCTLCardinalityFormula, CTLCardinalityXMLFileName, CTLCardinalityHRFileName, "CTLCardinality", logger)
 
 }
 
-func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold int, canUnfold bool, generation func(int, modelInfo) formula, outFileName string, formulaType string, logger *log.Logger) {
+func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold int, canUnfold bool, generation func(int, modelInfo) formula, outXMLFileName, outHRFileName string, formulaType string, logger *log.Logger) {
 
 	modelType := "COL"
 	if m.modelType != col {
@@ -68,7 +68,8 @@ func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold in
 
 	// write to file
 	logger.Print("Writting formulas")
-	m.writeFormulas(formulas, outFileName, formulaType, true)
+	m.writexmlFormulas(formulas, outXMLFileName, formulaType, true, logger)
+	m.writehrFormulas(formulas, outHRFileName, formulaType, true, logger)
 
 	if m.twinModel == nil {
 		return
@@ -95,7 +96,8 @@ func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold in
 
 	// write to file
 	logger.Print("Writting formulas")
-	m.writeFormulas(formulas, outFileName, formulaType, true)
+	m.writexmlFormulas(formulas, outXMLFileName, formulaType, true, logger)
+	m.writehrFormulas(formulas, outHRFileName, formulaType, true, logger)
 }
 
 func (m *modelInfo) genericGeneration(numFormulas, depth int, canUnfold bool, generation func(int, modelInfo) formula, logger *log.Logger) []formula {

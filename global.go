@@ -20,8 +20,10 @@ package main
 
 const (
 	version                   string = "v0.2"
-	CTLFireabilityFileName    string = "CTLFireability.xml"
-	CTLCardinalityFileName    string = "CTLCardinality.xml"
+	CTLFireabilityXMLFileName string = "CTLFireability.xml"
+	CTLCardinalityXMLFileName string = "CTLCardinality.xml"
+	CTLFireabilityHRFileName  string = "CTLFireability.txt"
+	CTLCardinalityHRFileName  string = "CTLCardinality.txt"
 	defaultMaxArity           int    = 2        // max arity for operators
 	defaultMaxAtomSize        int    = 5        // max number of transitions/places in any atom
 	defaultMaxIntegerConstant int    = 100      // max constant to appear in integer comparisons in formulas
