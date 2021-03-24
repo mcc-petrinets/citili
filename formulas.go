@@ -27,16 +27,6 @@ type formula struct {
 	operand  []formula
 }
 
-// Determine maxDepth of a formula from previous maxDepth
-func getDepth(oldDepth int, randomChoose bool) (newDepth int) {
-	if oldDepth > 1 && randomChoose {
-		newDepth = rand.Intn(oldDepth-1) + 1
-	} else {
-		newDepth = oldDepth - 1
-	}
-	return
-}
-
 // Generation of a boolean formula
 func genBooleanFormula(maxDepth int) (f formula) {
 	if maxDepth <= 1 {
@@ -53,11 +43,11 @@ func genBooleanFormula(maxDepth int) (f formula) {
 	f.operand = make([]formula, arity)
 	if f.operator.isOverBooleans {
 		for i := 0; i < arity; i++ {
-			f.operand[i] = genBooleanFormula(getDepth(maxDepth, i > 0))
+			f.operand[i] = genBooleanFormula(maxDepth - 1)
 		}
 	} else {
 		for i := 0; i < arity; i++ {
-			f.operand[i] = genPathFormula(getDepth(maxDepth, i > 0))
+			f.operand[i] = genPathFormula(maxDepth - 1)
 		}
 	}
 
@@ -74,7 +64,7 @@ func genPathFormula(maxDepth int) (f formula) {
 	arity := rand.Intn(f.operator.maxArity+1-f.operator.minArity) + f.operator.minArity
 	f.operand = make([]formula, arity)
 	for i := 0; i < arity; i++ {
-		f.operand[i] = genBooleanFormula(getDepth(maxDepth, i > 0))
+		f.operand[i] = genBooleanFormula(maxDepth - 1)
 	}
 
 	return f
@@ -83,7 +73,7 @@ func genPathFormula(maxDepth int) (f formula) {
 // Generation of a generic CTL formula
 func genCTLFormula(maxDepth int) formula {
 	f := genBooleanFormula(maxDepth)
-	for isInOtherCategory(f) {
+	for isInOtherCategory(f) || !isInteresting(f) {
 		f = genBooleanFormula(maxDepth)
 	}
 	return f
@@ -106,13 +96,44 @@ func isInOtherCategory(f formula) bool {
 	return true
 }
 
-// Checks if a formula contains at least one CTL operator
+// Checks if a formula contains CTL operator
 func containsCTLOperator(f formula) bool {
 	if f.operator.name == "E" || f.operator.name == "A" {
 		return true
 	}
 	for _, operand := range f.operand {
 		if containsCTLOperator(operand) {
+			return true
+		}
+	}
+	return false
+}
+
+// Checks if a formula is of interest:
+// no part of it is purely boolean with no LTL or CTL operator
+func isInteresting(f formula) bool {
+	if f.operator.name == "not" ||
+		f.operator.name == "or" ||
+		f.operator.name == "and" {
+		for _, operand := range f.operand {
+			if !isInteresting(operand) {
+				return false
+			}
+		}
+		return true
+	}
+	return containsCTLOrLTLOperator(f)
+}
+
+// Checks if a formula contains a CTL or an LTL operator
+func containsCTLOrLTLOperator(f formula) bool {
+	if f.operator.name == "E" || f.operator.name == "A" ||
+		f.operator.name == "G" || f.operator.name == "F" ||
+		f.operator.name == "X" || f.operator.name == "U" {
+		return true
+	}
+	for _, operand := range f.operand {
+		if containsCTLOrLTLOperator(operand) {
 			return true
 		}
 	}
