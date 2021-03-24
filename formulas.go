@@ -80,7 +80,7 @@ func genCTLFormula(maxDepth int) formula {
 }
 
 // Checks if a CTL formula also belongs to another category
-// LTL: A xxx (or just xxx) with xxx containing no A or E operator
+// LTL: A xxx with xxx containing no A or E operator
 // Reachability EF xxx or AG xxx with xxx containing no A or E operator
 func isInOtherCategory(f formula) bool {
 	if f.operator.name == "E" {
@@ -110,34 +110,19 @@ func containsCTLOperator(f formula) bool {
 }
 
 // Checks if a formula is of interest:
-// no part of it is purely boolean with no LTL or CTL operator
+// no part of it is purely boolean
 func isInteresting(f formula) bool {
 	if f.operator.name == "not" ||
 		f.operator.name == "or" ||
-		f.operator.name == "and" {
+		f.operator.name == "and" ||
+		f.operator == atom {
 		for _, operand := range f.operand {
 			if !isInteresting(operand) {
 				return false
 			}
 		}
-		return true
 	}
-	return containsCTLOrLTLOperator(f)
-}
-
-// Checks if a formula contains a CTL or an LTL operator
-func containsCTLOrLTLOperator(f formula) bool {
-	if f.operator.name == "E" || f.operator.name == "A" ||
-		f.operator.name == "G" || f.operator.name == "F" ||
-		f.operator.name == "X" || f.operator.name == "U" {
-		return true
-	}
-	for _, operand := range f.operand {
-		if containsCTLOrLTLOperator(operand) {
-			return true
-		}
-	}
-	return false
+	return true
 }
 
 // Generation of a CTLFireability formula
