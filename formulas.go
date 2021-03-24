@@ -27,6 +27,16 @@ type formula struct {
 	operand  []formula
 }
 
+// Determine maxDepth of a formula from previous maxDepth
+func getDepth(oldDepth int, randomChoose bool) (newDepth int) {
+	if oldDepth > 1 && randomChoose {
+		newDepth = rand.Intn(oldDepth-1) + 1
+	} else {
+		newDepth = oldDepth - 1
+	}
+	return
+}
+
 // Generation of a boolean formula
 func genBooleanFormula(maxDepth int) (f formula) {
 	if maxDepth <= 1 {
@@ -43,11 +53,11 @@ func genBooleanFormula(maxDepth int) (f formula) {
 	f.operand = make([]formula, arity)
 	if f.operator.isOverBooleans {
 		for i := 0; i < arity; i++ {
-			f.operand[i] = genBooleanFormula(maxDepth - 1)
+			f.operand[i] = genBooleanFormula(getDepth(maxDepth, i > 0))
 		}
 	} else {
 		for i := 0; i < arity; i++ {
-			f.operand[i] = genPathFormula(maxDepth - 1)
+			f.operand[i] = genPathFormula(getDepth(maxDepth, i > 0))
 		}
 	}
 
@@ -64,7 +74,7 @@ func genPathFormula(maxDepth int) (f formula) {
 	arity := rand.Intn(f.operator.maxArity+1-f.operator.minArity) + f.operator.minArity
 	f.operand = make([]formula, arity)
 	for i := 0; i < arity; i++ {
-		f.operand[i] = genBooleanFormula(maxDepth - 1)
+		f.operand[i] = genBooleanFormula(getDepth(maxDepth, i > 0))
 	}
 
 	return f
@@ -72,7 +82,41 @@ func genPathFormula(maxDepth int) (f formula) {
 
 // Generation of a generic CTL formula
 func genCTLFormula(maxDepth int) formula {
-	return genBooleanFormula(maxDepth)
+	f := genBooleanFormula(maxDepth)
+	for isInOtherCategory(f) {
+		f = genBooleanFormula(maxDepth)
+	}
+	return f
+}
+
+// Checks if a CTL formula also belongs to another category
+// LTL: A xxx (or just xxx) with xxx containing no A or E operator
+// Reachability EF xxx or AG xxx with xxx containing no A or E operator
+func isInOtherCategory(f formula) bool {
+	if f.operator.name == "E" {
+		if f.operand[0].operator.name != "F" {
+			return false
+		}
+	}
+	for _, operand := range f.operand {
+		if containsCTLOperator(operand) {
+			return false
+		}
+	}
+	return true
+}
+
+// Checks if a formula contains at least one CTL operator
+func containsCTLOperator(f formula) bool {
+	if f.operator.name == "E" || f.operator.name == "A" {
+		return true
+	}
+	for _, operand := range f.operand {
+		if containsCTLOperator(operand) {
+			return true
+		}
+	}
+	return false
 }
 
 // Generation of a CTLFireability formula
