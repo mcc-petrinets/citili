@@ -117,7 +117,7 @@ func handleModel(pos int, models []*modelInfo, numFormulas, formulaDepth, numUnf
 	logger.Print("Starting goroutine")
 
 	logger.Print("generating formulas")
-	m.genFormulas(numFormulas, formulaDepth, numUnfold, logger)
+	m.genFormulas(numFormulas, formulaDepth, numUnfold, logger, routineNum)
 	models[pos] = nil
 	logger.Print("Ending goroutine")
 	doneChan <- routineNum

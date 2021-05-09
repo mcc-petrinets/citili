@@ -38,18 +38,19 @@ const (
 )
 
 type modelInfo struct {
-	filePath            string
-	directory           string
-	modelName           string
-	modelType           modelType
-	modelInstance       string
-	twinModel           *modelInfo
-	places              []string            // ids of places to use for generation
-	unmappedPlaces      []string            // ids of places that will not be used for generation
-	transitions         []string            // ids of transitions to use for generation
-	unmappedTransitions []string            // ids of transitions that will not be used for generation
-	placesMapping       map[string][]string // mapping of ids of places to ids of the twin model
-	transitionsMapping  map[string][]string // mapping of ids of transitions
+	filePath                string
+	directory               string
+	modelName               string
+	modelType               modelType
+	modelInstance           string
+	modelInstanceSeparators int // HACK: for dealing with models with - in the instance, MCC2021 surprise
+	twinModel               *modelInfo
+	places                  []string            // ids of places to use for generation
+	unmappedPlaces          []string            // ids of places that will not be used for generation
+	transitions             []string            // ids of transitions to use for generation
+	unmappedTransitions     []string            // ids of transitions that will not be used for generation
+	placesMapping           map[string][]string // mapping of ids of places to ids of the twin model
+	transitionsMapping      map[string][]string // mapping of ids of transitions
 }
 
 func listModels(inputDir string) []*modelInfo {
@@ -92,11 +93,14 @@ func listModels(inputDir string) []*modelInfo {
 
 		// fill the modelInfo for the current model
 		splitName := strings.Split(fileInfo.Name(), "-")
+		instanceName := strings.Join(splitName[2:], "-")
+		separators := len(splitName[2:]) - 1
 		model := modelInfo{
-			filePath:      modelFilePath,
-			directory:     directory,
-			modelName:     splitName[0],
-			modelInstance: splitName[2],
+			filePath:                modelFilePath,
+			directory:               directory,
+			modelName:               splitName[0],
+			modelInstance:           instanceName,
+			modelInstanceSeparators: separators,
 		}
 		if splitName[1] == "COL" {
 			model.modelType = col

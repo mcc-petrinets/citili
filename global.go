@@ -19,7 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 package main
 
 const (
-	version                   string = "v0.2"
+	version                   string = "v2021"
 	CTLFireabilityXMLFileName string = "CTLFireability.xml"
 	CTLCardinalityXMLFileName string = "CTLCardinality.xml"
 	CTLFireabilityHRFileName  string = "CTLFireability.txt"
@@ -34,7 +34,7 @@ const (
 	defaultMaxFilterTries     int    = 3        // maximum number of call to SMC per model
 	defaultFilterSetSize      int    = 16       // number of formula to generate for one round of SMC filtering
 	defaultSMCPath            string = "smc.py"
-	defaultSMCTmpFileName     string = "tmp.xml"
+	defaultSMCTmpFileName     string = "tmp"
 	defaultSMClogfile         string = "smclog"
 	defaultSMCMaxStates       int    = 2000
 	defaultNumProc            int    = 1 // number of cores to use for generating formulas

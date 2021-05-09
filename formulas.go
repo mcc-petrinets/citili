@@ -88,12 +88,10 @@ func isInOtherCategory(f formula) bool {
 			return false
 		}
 	}
-	for _, operand := range f.operand {
-		if containsCTLOperator(operand) {
-			return false
-		}
+	if f.operator.name == "A" {
+		return !containsCTLOperator(f.operand[0])
 	}
-	return true
+	return false
 }
 
 // Checks if a formula contains CTL operator
@@ -114,15 +112,14 @@ func containsCTLOperator(f formula) bool {
 func isInteresting(f formula) bool {
 	if f.operator.name == "not" ||
 		f.operator.name == "or" ||
-		f.operator.name == "and" ||
-		f.operator == atom {
+		f.operator.name == "and" {
 		for _, operand := range f.operand {
 			if !isInteresting(operand) {
 				return false
 			}
 		}
 	}
-	return true
+	return f.operator != atom
 }
 
 // Generation of a CTLFireability formula

@@ -22,7 +22,7 @@ import (
 	"log"
 )
 
-func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int, logger *log.Logger) {
+func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int, logger *log.Logger, routineNum int) {
 
 	// should never occur, to remove after test
 	if m.twinModel != nil {
@@ -47,15 +47,15 @@ func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int, logger *log.L
 
 	// CTLFireability
 	logger.Print("Generating ", numFormulas, " CTLFireability formulas")
-	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genCTLFireabilityFormula, CTLFireabilityXMLFileName, CTLFireabilityHRFileName, "CTLFireability", logger)
+	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genCTLFireabilityFormula, CTLFireabilityXMLFileName, CTLFireabilityHRFileName, "CTLFireability", logger, routineNum)
 
 	// CTLCardinality
 	logger.Print("Generating ", numFormulas, " CTLCardinality formulas")
-	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genCTLCardinalityFormula, CTLCardinalityXMLFileName, CTLCardinalityHRFileName, "CTLCardinality", logger)
+	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genCTLCardinalityFormula, CTLCardinalityXMLFileName, CTLCardinalityHRFileName, "CTLCardinality", logger, routineNum)
 
 }
 
-func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold int, canUnfold bool, generation func(int, modelInfo) formula, outXMLFileName, outHRFileName string, formulaType string, logger *log.Logger) {
+func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold int, canUnfold bool, generation func(int, modelInfo) formula, outXMLFileName, outHRFileName string, formulaType string, logger *log.Logger, routineNum int) {
 
 	modelType := "COL"
 	if m.modelType != col {
@@ -64,7 +64,7 @@ func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold in
 	logger.Print("Working on ", modelType, " model")
 
 	// gen numFormulas formulas
-	formulas := m.genericGeneration(numFormulas, depth, canUnfold, generation, logger)
+	formulas := m.genericGeneration(numFormulas, depth, canUnfold, generation, logger, routineNum)
 
 	// write to file
 	logger.Print("Writting formulas")
@@ -89,7 +89,7 @@ func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold in
 	}
 
 	// generating numFormulas - numUnfold formulas
-	newFormulas := m.genericGeneration(numFormulas-numUnfold, depth, canUnfold, generation, logger)
+	newFormulas := m.genericGeneration(numFormulas-numUnfold, depth, canUnfold, generation, logger, routineNum)
 	for i := numUnfold; i < numFormulas; i++ {
 		formulas[i] = newFormulas[i-numUnfold]
 	}
@@ -100,7 +100,7 @@ func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold in
 	m.writehrFormulas(formulas, outHRFileName, formulaType, true, logger)
 }
 
-func (m *modelInfo) genericGeneration(numFormulas, depth int, canUnfold bool, generation func(int, modelInfo) formula, logger *log.Logger) []formula {
+func (m *modelInfo) genericGeneration(numFormulas, depth int, canUnfold bool, generation func(int, modelInfo) formula, logger *log.Logger, routineNum int) []formula {
 	numFound := 0
 	filterRounds := 0
 	formulas := make([]formula, numFormulas)
@@ -114,7 +114,7 @@ func (m *modelInfo) genericGeneration(numFormulas, depth int, canUnfold bool, ge
 
 		// filter out easy formula
 		logger.Print("Filtering formulas")
-		toKeep := m.filter(tmpFormulas, numFormulas-numFound, canUnfold, logger)
+		toKeep := m.filter(tmpFormulas, numFormulas-numFound, canUnfold, logger, routineNum)
 		for i := 0; i < len(toKeep) && numFound < numFormulas; i++ {
 			formulas[numFound] = tmpFormulas[toKeep[i]]
 			numFound++

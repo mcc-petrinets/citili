@@ -12,3 +12,5 @@ smclog
 tmp.xml
 INPUTS.tar.gz
 logs/*
+smclog*
+*.xml*

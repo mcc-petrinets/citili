@@ -179,8 +179,8 @@ func (f formula) asxml(currentIndent string) (xmlf string) {
 			currentIndent, "<until>\n",
 			currentIndent, indent, "<before>\n", xmlbefore,
 			currentIndent, indent, "</before>\n",
-			currentIndent, indent, "<after>\n", xmlafter,
-			currentIndent, indent, "</after>\n",
+			currentIndent, indent, "<reach>\n", xmlafter,
+			currentIndent, indent, "</reach>\n",
 			currentIndent, "</until>\n",
 		)
 	case "is-fireable":

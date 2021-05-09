@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func (m *modelInfo) filter(formulas []formula, numToFind int, canUnfold bool, logger *log.Logger) []int {
+func (m *modelInfo) filter(formulas []formula, numToFind int, canUnfold bool, logger *log.Logger, routineNum int) []int {
 
 	// model
 	modelPath := m.filePath
@@ -44,23 +44,27 @@ func (m *modelInfo) filter(formulas []formula, numToFind int, canUnfold bool, lo
 		// change the model accordingly
 		modelPath = m.twinModel.filePath
 	}
-	m.writexmlFormulas(formulas, globalSMCTmpFileName, "ForFiltering", false, logger)
+
+	tmpFileName := fmt.Sprint(globalSMCTmpFileName, routineNum, ".xml")
+	m.writexmlFormulas(formulas, tmpFileName, "ForFiltering", false, logger)
 
 	// smc run
-	logger.Print("running SMC on model ", modelPath, " with formulas file ", globalSMCTmpFileName)
+	logger.Print("running SMC on model ", modelPath, " with formulas file ", tmpFileName)
 
-	return runSMC(modelPath, globalSMCTmpFileName, numToFind, logger)
+	return runSMC(modelPath, tmpFileName, numToFind, logger, routineNum, m.modelInstanceSeparators)
 }
 
-func runSMC(model, formulas string, numToFind int, logger *log.Logger) []int {
+func runSMC(model, formulas string, numToFind int, logger *log.Logger, routineNum int, numSeparators int) []int {
 	tokeep := make([]int, 0)
 	smcMaxStates := fmt.Sprint("--max-states=", globalSMCMaxStates)
 	smcStopAfter := fmt.Sprint("--mcc15-stop-after=", numToFind)
 	smcCommand := exec.Command("python", globalSMCPath, "--use10", smcMaxStates, smcStopAfter, model, formulas)
-	logSMCCommand := exec.Command("tee", "-a", globalSMClogfile)
+	logFile := fmt.Sprint(globalSMClogfile, routineNum)
+	logSMCCommand := exec.Command("tee", "-a", logFile)
 	filterCommand1 := exec.Command("grep", "-v", "^smc:")
 	filterCommand2 := exec.Command("grep", "?")
-	cutCommand := exec.Command("cut", "-d-", "-f5")
+	fieldFilter := fmt.Sprint("-f", 6+numSeparators)
+	cutCommand := exec.Command("cut", "-d-", fieldFilter)
 	logReader, smcWriter := io.Pipe()
 	command1Reader, logWriter := io.Pipe()
 	command2Reader, command1Writer := io.Pipe()
