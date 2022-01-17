@@ -111,11 +111,11 @@ func (m *modelInfo) genericGeneration(numFormulas, depth int, canUnfold bool, ge
 	numFound := 0
 	filterRounds := 0
 	formulas := make([]formula, numFormulas)
-	for numFound < numFormulas && filterRounds < globalMaxFilterTries {
+	for numFound < numFormulas && filterRounds < globalConfiguration.MaxFilterTries {
 		// gen numFormulas formulas
 		logger.Print("Generating formulas")
-		tmpFormulas := make([]formula, globalFilterSetSize)
-		for i := 0; i < globalFilterSetSize; i++ {
+		tmpFormulas := make([]formula, globalConfiguration.FilterSetSize)
+		for i := 0; i < globalConfiguration.FilterSetSize; i++ {
 			tmpFormulas[i] = generation(depth, *m)
 		}
 

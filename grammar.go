@@ -53,8 +53,8 @@ func initBooleanOperators() {
 		allPathsOperator,
 		existsPathOperator,
 		operator{"not", 1, 1, true},
-		operator{"and", 2, globalMaxArity, true},
-		operator{"or", 2, globalMaxArity, true},
+		operator{"and", 2, globalConfiguration.MaxArity, true},
+		operator{"or", 2, globalConfiguration.MaxArity, true},
 	}
 }
 
@@ -62,7 +62,7 @@ func initStateOperators() {
 	stateOperators = []operator{
 		atom,
 		operator{"not", 1, 1, true},
-		operator{"and", 2, globalMaxArity, true},
-		operator{"or", 2, globalMaxArity, true},
+		operator{"and", 2, globalConfiguration.MaxArity, true},
+		operator{"or", 2, globalConfiguration.MaxArity, true},
 	}
 }

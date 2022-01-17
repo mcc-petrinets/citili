@@ -45,7 +45,7 @@ func (m *modelInfo) filter(formulas []formula, numToFind int, canUnfold bool, lo
 		modelPath = m.twinModel.filePath
 	}
 
-	tmpFileName := fmt.Sprint(globalSMCTmpFileName, routineNum, ".xml")
+	tmpFileName := fmt.Sprint(globalConfiguration.SMCTmpFileName, routineNum, ".xml")
 	m.writexmlFormulas(formulas, tmpFileName, "ForFiltering", false, logger)
 
 	// smc run
@@ -56,10 +56,10 @@ func (m *modelInfo) filter(formulas []formula, numToFind int, canUnfold bool, lo
 
 func runSMC(model, formulas string, numToFind int, logger *log.Logger, routineNum int, numSeparators int) []int {
 	tokeep := make([]int, 0)
-	smcMaxStates := fmt.Sprint("--max-states=", globalSMCMaxStates)
+	smcMaxStates := fmt.Sprint("--max-states=", globalConfiguration.SMCMaxStates)
 	smcStopAfter := fmt.Sprint("--mcc15-stop-after=", numToFind)
-	smcCommand := exec.Command("python", globalSMCPath, "--use10", smcMaxStates, smcStopAfter, model, formulas)
-	logFile := fmt.Sprint(globalSMClogfile, routineNum)
+	smcCommand := exec.Command("python", globalConfiguration.SMCPath, "--use10", smcMaxStates, smcStopAfter, model, formulas)
+	logFile := fmt.Sprint(globalConfiguration.SMClogfile, routineNum)
 	logSMCCommand := exec.Command("tee", "-a", logFile)
 	filterCommand1 := exec.Command("grep", "-v", "^smc:")
 	filterCommand2 := exec.Command("grep", "?")

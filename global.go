@@ -28,22 +28,26 @@ const (
 	CTLCardinalityHRFileName           string = "CTLCardinality.txt"
 	ReachabilityFireabilityHRFileName  string = "ReachabilityFireability.txt"
 	ReachabilityCardinalityHRFileName  string = "ReachabilityCardinality.txt"
-	defaultMaxArity                    int    = 2        // max arity for operators
-	defaultMaxAtomSize                 int    = 5        // max number of transitions/places in any atom
-	defaultMaxIntegerConstant          int    = 100      // max constant to appear in integer comparisons in formulas
-	defaultInputDir                    string = "INPUTS" // where to find the models
-	defaultNumFormulas                 int    = 16       // number of formulas to generate
-	defaultNumUnfold                   int    = 8        // number of formulas from COL models to unfold for generating formulas for PT models
-	defaultFormulaDepth                int    = 2        // maximum depth of generated formulas
-	defaultMaxFilterTries              int    = 3        // maximum number of call to SMC per model
-	defaultFilterSetSize               int    = 16       // number of formula to generate for one round of SMC filtering
-	defaultSMCPath                     string = "smc.py"
-	defaultSMCTmpFileName              string = "tmp"
-	defaultSMClogfile                  string = "smclog"
-	defaultSMCMaxStates                int    = 2000
-	defaultNumProc                     int    = 1 // number of cores to use for generating formulas
 )
 
+var defaultConfiguration config = config{
+	MaxArity:           2,        // max arity for operators
+	MaxAtomSize:        5,        // max number of transitions/places in any atom
+	MaxIntegerConstant: 100,      // max constant to appear in integer comparisons in formulas
+	InputDir:           "INPUTS", // where to find the models
+	NumFormulas:        16,       // number of formulas to generate
+	NumUnfold:          8,        // number of formulas from COL models to unfold for generating formulas for PT models
+	FormulaDepth:       2,        // maximum depth of generated formulas
+	MaxFilterTries:     3,        // maximum number of call to SMC per model
+	FilterSetSize:      16,       // number of formula to generate for one round of SMC filtering
+	SMCPath:            "smc.py",
+	SMCTmpFileName:     "tmp",
+	SMClogfile:         "smclog",
+	SMCMaxStates:       2000,
+	NumProc:            1, // number of cores to use for generating formulas
+}
+
+/*
 var (
 	globalMaxArity           int
 	globalMaxAtomSize        int
@@ -55,3 +59,4 @@ var (
 	globalSMCMaxStates       int
 	globalSMClogfile         string
 )
+*/

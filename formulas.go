@@ -177,8 +177,8 @@ func genFireabilityAtom(transitions []string) (f formula) {
 	f = formula{operator: isfireable}
 	f.operand = make([]formula, 0)
 	maxTransitions := len(transitions)
-	if maxTransitions > globalMaxAtomSize {
-		maxTransitions = globalMaxAtomSize
+	if maxTransitions > globalConfiguration.MaxAtomSize {
+		maxTransitions = globalConfiguration.MaxAtomSize
 	}
 	numTransitions := rand.Intn(maxTransitions) + 1
 	rand.Shuffle(len(transitions), func(i, j int) { transitions[i], transitions[j] = transitions[j], transitions[i] })
@@ -243,8 +243,8 @@ func genTokencount(places []string) (f formula) {
 	f = formula{operator: tokencount}
 	f.operand = make([]formula, 0)
 	maxPlaces := len(places)
-	if maxPlaces > globalMaxAtomSize {
-		maxPlaces = globalMaxAtomSize
+	if maxPlaces > globalConfiguration.MaxAtomSize {
+		maxPlaces = globalConfiguration.MaxAtomSize
 	}
 	numPlaces := rand.Intn(maxPlaces) + 1
 	rand.Shuffle(len(places), func(i, j int) { places[i], places[j] = places[j], places[i] })
@@ -258,7 +258,7 @@ func genTokencount(places []string) (f formula) {
 func genIntconstant() (f formula) {
 	f = formula{operator: integerconstant}
 	f.operand = make([]formula, 1)
-	val := fmt.Sprint(rand.Intn(globalMaxIntegerConstant) + 1)
+	val := fmt.Sprint(rand.Intn(globalConfiguration.MaxIntegerConstant) + 1)
 	f.operand[0] = formula{operator: operator{name: val}}
 	return f
 }
