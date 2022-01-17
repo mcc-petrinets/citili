@@ -29,21 +29,38 @@ var isfireable operator = operator{name: "is-fireable"}
 var tokencount operator = operator{name: "tokens-count"}
 var leqOperator operator = operator{"leq", 2, 2, false}
 var integerconstant operator = operator{"integer-constant", 1, 1, false}
+var allPathsOperator operator = operator{"A", 1, 1, false}
+var existsPathOperator operator = operator{"E", 1, 1, false}
+var globallyOperator operator = operator{"G", 1, 1, false}
+var finallyOperator operator = operator{"F", 1, 1, false}
+var nextOperator operator = operator{"X", 1, 1, false}
+var untilOperator operator = operator{"U", 2, 2, false}
 
 var booleanOperators []operator
 
 var pathOperators []operator = []operator{
-	operator{"G", 1, 1, false},
-	operator{"F", 1, 1, false},
-	operator{"X", 1, 1, false},
-	operator{"U", 2, 2, false},
+	globallyOperator,
+	finallyOperator,
+	nextOperator,
+	untilOperator,
 }
 
-func initOperators() {
+var stateOperators []operator
+
+func initBooleanOperators() {
 	booleanOperators = []operator{
 		atom,
-		operator{"A", 1, 1, false},
-		operator{"E", 1, 1, false},
+		allPathsOperator,
+		existsPathOperator,
+		operator{"not", 1, 1, true},
+		operator{"and", 2, globalMaxArity, true},
+		operator{"or", 2, globalMaxArity, true},
+	}
+}
+
+func initStateOperators() {
+	stateOperators = []operator{
+		atom,
 		operator{"not", 1, 1, true},
 		operator{"and", 2, globalMaxArity, true},
 		operator{"or", 2, globalMaxArity, true},

@@ -84,7 +84,8 @@ func main() {
 
 	models := listModels(*inputDirPtr)
 
-	initOperators()
+	initBooleanOperators() // for CTL only
+	initStateOperators()   // for reachability only
 
 	routineNum := 0
 	doneChan := make(chan int, *numProc)

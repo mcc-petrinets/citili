@@ -53,6 +53,13 @@ func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int, logger *log.L
 	logger.Print("Generating ", numFormulas, " CTLCardinality formulas")
 	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genCTLCardinalityFormula, CTLCardinalityXMLFileName, CTLCardinalityHRFileName, "CTLCardinality", logger, routineNum)
 
+	// ReachabilityFireability
+	logger.Print("Generating ", numFormulas, " ReachabilityFireability formulas")
+	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genReachabilityFireabilityFormula, ReachabilityFireabilityXMLFileName, ReachabilityFireabilityHRFileName, "ReachabilityFireability", logger, routineNum)
+
+	// ReachabilityCardinality
+	logger.Print("Generating ", numFormulas, " ReachabilityCardinality formulas")
+	m.genericGenerationAndWriting(numFormulas, depth, numUnfold, canUnfold, genReachabilityCardinalityFormula, ReachabilityCardinalityXMLFileName, ReachabilityCardinalityHRFileName, "ReachabilityCardinality", logger, routineNum)
 }
 
 func (m *modelInfo) genericGenerationAndWriting(numFormulas, depth, numUnfold int, canUnfold bool, generation func(int, modelInfo) formula, outXMLFileName, outHRFileName string, formulaType string, logger *log.Logger, routineNum int) {

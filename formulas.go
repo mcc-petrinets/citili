@@ -79,6 +79,40 @@ func genCTLFormula(maxDepth int) formula {
 	return f
 }
 
+// Generation of a state formula
+func genStateFormula(maxDepth int) (f formula) {
+	if maxDepth <= 1 {
+		f = formula{operator: stateOperators[0]}
+		return f
+	}
+
+	// choose operator
+	opNum := rand.Intn(len(stateOperators))
+	f = formula{operator: stateOperators[opNum]}
+
+	// generate subformulas
+	arity := rand.Intn(f.operator.maxArity+1-f.operator.minArity) + f.operator.minArity
+	f.operand = make([]formula, arity)
+	for i := 0; i < arity; i++ {
+		f.operand[i] = genStateFormula(maxDepth - 1)
+	}
+
+	return f
+}
+
+// Generation of a generic reachability formula
+func genReachabilityFormula(maxDepth int) (f formula) {
+	if rand.Intn(2) == 0 {
+		f.operator = allPathsOperator
+		f.operand = []formula{{operator: globallyOperator}}
+	} else {
+		f.operator = existsPathOperator
+		f.operand = []formula{{operator: finallyOperator}}
+	}
+	f.operand[0].operand = []formula{genStateFormula(maxDepth)}
+	return f
+}
+
 // Checks if a CTL formula also belongs to another category
 // LTL: A xxx with xxx containing no A or E operator
 // Reachability EF xxx or AG xxx with xxx containing no A or E operator
@@ -125,21 +159,21 @@ func isInteresting(f formula) bool {
 // Generation of a CTLFireability formula
 func genCTLFireabilityFormula(maxDepth int, m modelInfo) (f formula) {
 	f = genCTLFormula(maxDepth)
-	f.CTLFireabilitySubstituteAtoms(m.transitions)
+	f.fireabilitySubstituteAtoms(m.transitions)
 	return f
 }
 
-func (f *formula) CTLFireabilitySubstituteAtoms(transitions []string) {
+func (f *formula) fireabilitySubstituteAtoms(transitions []string) {
 	if f.operator == atom {
-		*f = genCTLFireabilityAtom(transitions)
+		*f = genFireabilityAtom(transitions)
 		return
 	}
 	for opNum := 0; opNum < len(f.operand); opNum++ {
-		f.operand[opNum].CTLFireabilitySubstituteAtoms(transitions)
+		f.operand[opNum].fireabilitySubstituteAtoms(transitions)
 	}
 }
 
-func genCTLFireabilityAtom(transitions []string) (f formula) {
+func genFireabilityAtom(transitions []string) (f formula) {
 	f = formula{operator: isfireable}
 	f.operand = make([]formula, 0)
 	maxTransitions := len(transitions)
@@ -158,21 +192,21 @@ func genCTLFireabilityAtom(transitions []string) (f formula) {
 // Generation of a CTLCardinality formula
 func genCTLCardinalityFormula(maxDepth int, m modelInfo) (f formula) {
 	f = genCTLFormula(maxDepth)
-	f.CTLCardinalitySubstituteAtoms(m.places)
+	f.cardinalitySubstituteAtoms(m.places)
 	return f
 }
 
-func (f *formula) CTLCardinalitySubstituteAtoms(places []string) {
+func (f *formula) cardinalitySubstituteAtoms(places []string) {
 	if f.operator == atom {
-		*f = genCTLCardinalityAtom(places)
+		*f = genCardinalityAtom(places)
 		return
 	}
 	for opNum := 0; opNum < len(f.operand); opNum++ {
-		f.operand[opNum].CTLCardinalitySubstituteAtoms(places)
+		f.operand[opNum].cardinalitySubstituteAtoms(places)
 	}
 }
 
-func genCTLCardinalityAtom(places []string) (f formula) {
+func genCardinalityAtom(places []string) (f formula) {
 	f = formula{operator: leqOperator}
 	f.operand = make([]formula, 2)
 	tokencountChoice := rand.Intn(3) // 0 : tokencount on the left, 1: tokencount on the right, 2: tokencount on both sides
@@ -190,6 +224,21 @@ func genCTLCardinalityAtom(places []string) (f formula) {
 	return f
 }
 
+// Generation of a ReachabilityFireability formula
+func genReachabilityFireabilityFormula(maxDepth int, m modelInfo) (f formula) {
+	f = genReachabilityFormula(maxDepth)
+	f.fireabilitySubstituteAtoms(m.transitions)
+	return f
+}
+
+// Generation of a ReachabilityCardinality formula
+func genReachabilityCardinalityFormula(maxDepth int, m modelInfo) (f formula) {
+	f = genReachabilityFormula(maxDepth)
+	f.cardinalitySubstituteAtoms(m.places)
+	return f
+}
+
+// Atoms generation
 func genTokencount(places []string) (f formula) {
 	f = formula{operator: tokencount}
 	f.operand = make([]formula, 0)
