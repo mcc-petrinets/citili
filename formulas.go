@@ -177,8 +177,8 @@ func genFireabilityAtom(transitions []string) (f formula) {
 	f = formula{operator: isfireable}
 	f.operand = make([]formula, 0)
 	maxTransitions := len(transitions)
-	if maxTransitions > globalConfiguration.MaxAtomSize {
-		maxTransitions = globalConfiguration.MaxAtomSize
+	if maxTransitions > globalConfiguration.MaxFireabilityAtomSize {
+		maxTransitions = globalConfiguration.MaxFireabilityAtomSize
 	}
 	numTransitions := rand.Intn(maxTransitions) + 1
 	rand.Shuffle(len(transitions), func(i, j int) { transitions[i], transitions[j] = transitions[j], transitions[i] })
@@ -192,34 +192,34 @@ func genFireabilityAtom(transitions []string) (f formula) {
 // Generation of a CTLCardinality formula
 func genCTLCardinalityFormula(maxDepth int, m modelInfo) (f formula) {
 	f = genCTLFormula(maxDepth)
-	f.cardinalitySubstituteAtoms(m.places)
+	f.cardinalitySubstituteAtoms(m)
 	return f
 }
 
-func (f *formula) cardinalitySubstituteAtoms(places []string) {
+func (f *formula) cardinalitySubstituteAtoms(m modelInfo) {
 	if f.operator == atom {
-		*f = genCardinalityAtom(places)
+		*f = genCardinalityAtom(m)
 		return
 	}
 	for opNum := 0; opNum < len(f.operand); opNum++ {
-		f.operand[opNum].cardinalitySubstituteAtoms(places)
+		f.operand[opNum].cardinalitySubstituteAtoms(m)
 	}
 }
 
-func genCardinalityAtom(places []string) (f formula) {
+func genCardinalityAtom(m modelInfo) (f formula) {
 	f = formula{operator: leqOperator}
 	f.operand = make([]formula, 2)
 	tokencountChoice := rand.Intn(3) // 0 : tokencount on the left, 1: tokencount on the right, 2: tokencount on both sides
 	switch tokencountChoice {
 	case 0:
-		f.operand[0] = genTokencount(places)
-		f.operand[1] = genIntconstant()
+		f.operand[0] = genTokencount(m.places)
+		f.operand[1] = genIntconstant(m.maxConstantInMarking)
 	case 1:
-		f.operand[0] = genIntconstant()
-		f.operand[1] = genTokencount(places)
+		f.operand[0] = genIntconstant(m.maxConstantInMarking)
+		f.operand[1] = genTokencount(m.places)
 	case 2:
-		f.operand[0] = genTokencount(places)
-		f.operand[1] = genTokencount(places)
+		f.operand[0] = genTokencount(m.places)
+		f.operand[1] = genTokencount(m.places)
 	}
 	return f
 }
@@ -234,7 +234,7 @@ func genReachabilityFireabilityFormula(maxDepth int, m modelInfo) (f formula) {
 // Generation of a ReachabilityCardinality formula
 func genReachabilityCardinalityFormula(maxDepth int, m modelInfo) (f formula) {
 	f = genReachabilityFormula(maxDepth)
-	f.cardinalitySubstituteAtoms(m.places)
+	f.cardinalitySubstituteAtoms(m)
 	return f
 }
 
@@ -243,8 +243,8 @@ func genTokencount(places []string) (f formula) {
 	f = formula{operator: tokencount}
 	f.operand = make([]formula, 0)
 	maxPlaces := len(places)
-	if maxPlaces > globalConfiguration.MaxAtomSize {
-		maxPlaces = globalConfiguration.MaxAtomSize
+	if maxPlaces > globalConfiguration.MaxCardinalityAtomSize {
+		maxPlaces = globalConfiguration.MaxCardinalityAtomSize
 	}
 	numPlaces := rand.Intn(maxPlaces) + 1
 	rand.Shuffle(len(places), func(i, j int) { places[i], places[j] = places[j], places[i] })
@@ -255,10 +255,13 @@ func genTokencount(places []string) (f formula) {
 	return f
 }
 
-func genIntconstant() (f formula) {
+func genIntconstant(max int) (f formula) {
+	if max < 1 {
+		max = globalConfiguration.MaxIntegerConstant
+	}
 	f = formula{operator: integerconstant}
 	f.operand = make([]formula, 1)
-	val := fmt.Sprint(rand.Intn(globalConfiguration.MaxIntegerConstant) + 1)
+	val := fmt.Sprint(rand.Intn(max) + 1) // allow 0 as constant?
 	f.operand[0] = formula{operator: operator{name: val}}
 	return f
 }

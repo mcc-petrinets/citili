@@ -1,5 +1,5 @@
-github.com/loig/pinimili v0.0.0-20201012155322-1faef4d0ee5b h1:OfvS8bXZXop+hoBM2G/2SWM9vxpnEGIVrRwkFfzYmDo=
-github.com/loig/pinimili v0.0.0-20201012155322-1faef4d0ee5b/go.mod h1:G7FFW85Rx0yfwM6/CljHhHWBnmtRcXT1CCVsZZYSPqM=
+github.com/loig/pinimili v0.0.0-20220311102754-8f54d3785184 h1:SGEDbS89XtSwwsdjzpH0XyVkd822tIUA6jQRlR3QESQ=
+github.com/loig/pinimili v0.0.0-20220311102754-8f54d3785184/go.mod h1:G7FFW85Rx0yfwM6/CljHhHWBnmtRcXT1CCVsZZYSPqM=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=

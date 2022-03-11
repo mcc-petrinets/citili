@@ -38,19 +38,22 @@ const (
 )
 
 type modelInfo struct {
-	filePath                string
-	directory               string
-	modelName               string
-	modelType               modelType
-	modelInstance           string
-	modelInstanceSeparators int // HACK: for dealing with models with - in the instance, MCC2021 surprise
-	twinModel               *modelInfo
-	places                  []string            // ids of places to use for generation
-	unmappedPlaces          []string            // ids of places that will not be used for generation
-	transitions             []string            // ids of transitions to use for generation
-	unmappedTransitions     []string            // ids of transitions that will not be used for generation
-	placesMapping           map[string][]string // mapping of ids of places to ids of the twin model
-	transitionsMapping      map[string][]string // mapping of ids of transitions
+	filePath                 string
+	directory                string
+	modelName                string
+	modelType                modelType
+	modelInstance            string
+	modelInstanceSeparators  int // HACK: for dealing with models with - in the instance, MCC2021 surprise
+	twinModel                *modelInfo
+	pnml                     *pnml.Pnml
+	places                   []string            // ids of places to use for generation
+	unmappedPlaces           []string            // ids of places that will not be used for generation
+	transitions              []string            // ids of transitions to use for generation
+	unmappedTransitions      []string            // ids of transitions that will not be used for generation
+	placesMapping            map[string][]string // mapping of ids of places to ids of the twin model
+	transitionsMapping       map[string][]string // mapping of ids of transitions
+	maxConstantInMarking     int
+	maxConstantInTransitions int
 }
 
 func listModels(inputDir string) []*modelInfo {
@@ -153,14 +156,33 @@ func listModels(inputDir string) []*modelInfo {
 	return models
 }
 
+func (m *modelInfo) getpnml(logger *log.Logger) {
+	if m.pnml == nil {
+		m.pnml = pnml.GetPnml(m.filePath, false)
+		logger.Print(
+			"Pnml parsed",
+		)
+	}
+}
+
 func (m *modelInfo) getids(logger *log.Logger) {
 	if m.places == nil || m.transitions == nil {
-		m.places, m.transitions = pnml.Getptids(m.filePath, false)
+		m.places, m.transitions = m.pnml.Getptids()
 		logger.Print(
 			len(m.places), " places and ",
 			len(m.transitions), " transitions.",
 		)
 	}
+}
+
+func (m *modelInfo) getMaxConstants(logger *log.Logger) {
+	m.maxConstantInMarking = -1
+	if m.modelType == pt {
+		m.maxConstantInMarking = int(m.pnml.GetMaxConstantInMarking())
+	}
+	logger.Print(
+		"maximum constant appearing in marking: ", m.maxConstantInMarking,
+	)
 }
 
 func (m *modelInfo) mapids(logger *log.Logger) error {

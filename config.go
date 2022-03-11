@@ -7,20 +7,21 @@ import (
 )
 
 type config struct {
-	MaxArity           int
-	MaxAtomSize        int
-	MaxIntegerConstant int
-	InputDir           string
-	NumFormulas        int
-	NumUnfold          int
-	FormulaDepth       int
-	MaxFilterTries     int
-	FilterSetSize      int
-	SMCPath            string
-	SMCTmpFileName     string
-	SMClogfile         string
-	SMCMaxStates       int
-	NumProc            int
+	MaxArity               int
+	MaxFireabilityAtomSize int
+	MaxCardinalityAtomSize int
+	MaxIntegerConstant     int
+	InputDir               string
+	NumFormulas            int
+	NumUnfold              int
+	FormulaDepth           int
+	MaxFilterTries         int
+	FilterSetSize          int
+	SMCPath                string
+	SMCTmpFileName         string
+	SMClogfile             string
+	SMCMaxStates           int
+	NumProc                int
 }
 
 var globalConfiguration config

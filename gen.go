@@ -33,9 +33,13 @@ func (m *modelInfo) genFormulas(numFormulas, depth, numUnfold int, logger *log.L
 	}
 
 	var error error
+	m.getpnml(logger)
 	m.getids(logger)
+	m.getMaxConstants(logger)
 	if m.twinModel != nil {
+		m.twinModel.getpnml(logger)
 		m.twinModel.getids(logger)
+		m.twinModel.getMaxConstants(logger)
 		error = m.twinModel.mapids(logger)
 	}
 
