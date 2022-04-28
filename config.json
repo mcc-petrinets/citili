@@ -1,3 +1,12 @@
 {
-  "MaxArity": 12
+  "FilterSetSize": 32,
+  "FormulaDepth": 10,
+  "MaxArity": 2,
+  "MaxCardinalityAtomSize": 1,
+  "MaxFireabilityAtomSize": 1,
+  "MaxFilterTries": 2,
+  "MaxIntegerConstant": 50,
+  "NumFormulas": 16,
+  "NumUnfold": 8,
+  "SMCMaxStates": 2000
 }

@@ -14,3 +14,6 @@ INPUTS.tar.gz
 logs/*
 smclog*
 *.xml*
+*.tgz
+qualif/*
+config2022.json

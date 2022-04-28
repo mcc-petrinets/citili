@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"runtime"
 )
@@ -32,6 +33,8 @@ func main() {
 
 	flag.Parse()
 	getConfig(*configFile)
+
+	rand.Seed(globalConfiguration.Seed)
 
 	log.Print(
 		"Working with:\n",

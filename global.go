@@ -32,7 +32,7 @@ const (
 
 var defaultConfiguration config = config{
 	MaxArity:               2,        // max arity for operators
-	MaxFireabilityAtomSize: 5,        // max number of transitions in any atom
+	MaxFireabilityAtomSize: 1,        // max number of transitions in any atom
 	MaxCardinalityAtomSize: 1,        // max number of places in any atom
 	MaxIntegerConstant:     100,      // max constant to appear in integer comparisons in formulas
 	InputDir:               "INPUTS", // where to find the models

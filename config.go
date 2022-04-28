@@ -7,6 +7,7 @@ import (
 )
 
 type config struct {
+	Seed                   int64
 	MaxArity               int
 	MaxFireabilityAtomSize int
 	MaxCardinalityAtomSize int
