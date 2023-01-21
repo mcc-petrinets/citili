@@ -8,5 +8,7 @@
   "MaxIntegerConstant": 50,
   "NumFormulas": 16,
   "NumUnfold": 8,
-  "SMCMaxStates": 2000
+  "SMCMaxStates": 2000,
+  "InputDir": "INPUTS",
+  "NumProc": 1
 }

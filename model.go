@@ -185,6 +185,27 @@ func (m *modelInfo) getMaxConstants(logger *log.Logger) {
 	)
 }
 
+// checks if a place/transition of a PT model was unfolded from a place/transition
+// of the twin COL model
+func isUnfolding(ptNode, colNode string, colNodes []string, logger *log.Logger) bool {
+	if strings.HasPrefix(ptNode, colNode) {
+		logger.Print("Nodes mapping: ", ptNode, " could have been obtained from ", colNode)
+		if ptNode == colNode {
+			logger.Print("Nodes mapping: yes, it was (equality)")
+			return true
+		}
+		for _, n := range colNodes {
+			if ptNode == n {
+				logger.Print("Nodes mapping: no, it was not, ", n, " exists in COL")
+				return false
+			}
+		}
+		logger.Print("Nodes mapping: yes, it was (prefix)")
+		return true
+	}
+	return false
+}
+
 func (m *modelInfo) mapids(logger *log.Logger) error {
 	// when this function is called, m should always be the PT model
 
@@ -199,7 +220,7 @@ func (m *modelInfo) mapids(logger *log.Logger) error {
 		for _, p := range m.twinModel.places {
 			// will not work if a place of the COL model has an id which is a prefix of another place id of this model
 			for i, pp := range m.places {
-				if strings.HasPrefix(pp, p) {
+				if isUnfolding(pp, p, m.twinModel.places, logger) {
 					m.placesMapping[p] = append(m.placesMapping[p], pp)
 					checkPlaces[i] = true
 				}
@@ -241,7 +262,7 @@ func (m *modelInfo) mapids(logger *log.Logger) error {
 		for _, t := range m.twinModel.transitions {
 			// will not work if a transition of the COL model has an id which is a prefix of another transition id of this model
 			for i, tt := range m.transitions {
-				if strings.HasPrefix(tt, t) {
+				if isUnfolding(tt, t, m.twinModel.transitions, logger) {
 					m.transitionsMapping[t] = append(m.transitionsMapping[t], tt)
 					checkTransitions[i] = true
 				}
