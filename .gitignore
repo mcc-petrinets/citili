@@ -17,3 +17,7 @@ smclog*
 *.tgz
 qualif/*
 config2022.json
+config2023.json
+*.log
+*.zip
+MCC-2023/*

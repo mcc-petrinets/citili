@@ -11,6 +11,7 @@ type config struct {
 	MaxArity               int
 	MaxFireabilityAtomSize int
 	MaxCardinalityAtomSize int
+	MinIntegerConstant     int
 	MaxIntegerConstant     int
 	InputDir               string
 	NumFormulas            int

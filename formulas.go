@@ -76,7 +76,7 @@ func genCTLFormula(maxDepth int) formula {
 	for isInOtherCategory(f) || !isInteresting(f) {
 		f = genBooleanFormula(maxDepth)
 	}
-	return f
+	return removeDoubleNegations(f)
 }
 
 // Generation of a state formula
@@ -110,7 +110,7 @@ func genReachabilityFormula(maxDepth int) (f formula) {
 		f.operand = []formula{{operator: finallyOperator}}
 	}
 	f.operand[0].operand = []formula{genStateFormula(maxDepth)}
-	return f
+	return removeDoubleNegations(f)
 }
 
 // Checks if a CTL formula also belongs to another category
@@ -154,6 +154,21 @@ func isInteresting(f formula) bool {
 		}
 	}
 	return f.operator != atom
+}
+
+// Remove not not from a formula
+func removeDoubleNegations(f formula) formula {
+	if f.operator.name == "not" {
+		if f.operand[0].operator.name == "not" {
+			return removeDoubleNegations(f.operand[0])
+		}
+	}
+	if f.operator != atom {
+		for i, operand := range f.operand {
+			f.operand[i] = removeDoubleNegations(operand)
+		}
+	}
+	return f
 }
 
 // Generation of a CTLFireability formula
@@ -213,9 +228,9 @@ func genCardinalityAtom(m modelInfo) (f formula) {
 	switch tokencountChoice {
 	case 0:
 		f.operand[0] = genTokencount(m.places)
-		f.operand[1] = genIntconstant(m.maxConstantInMarking)
+		f.operand[1] = genIntconstant(0, m.maxConstantInMarking)
 	case 1:
-		f.operand[0] = genIntconstant(m.maxConstantInMarking)
+		f.operand[0] = genIntconstant(1, m.maxConstantInMarking)
 		f.operand[1] = genTokencount(m.places)
 	case 2:
 		f.operand[0] = genTokencount(m.places)
@@ -255,13 +270,16 @@ func genTokencount(places []string) (f formula) {
 	return f
 }
 
-func genIntconstant(max int) (f formula) {
+func genIntconstant(min int, max int) (f formula) {
 	if max < 1 {
-		max = globalConfiguration.MaxIntegerConstant
+		max = defaultConfiguration.MaxIntegerConstant
+	}
+	if min > max {
+		min = defaultConfiguration.MinIntegerConstant
 	}
 	f = formula{operator: integerconstant}
 	f.operand = make([]formula, 1)
-	val := fmt.Sprint(rand.Intn(max) + 1) // allow 0 as constant?
+	val := fmt.Sprint(rand.Intn(max-min+1) + min)
 	f.operand[0] = formula{operator: operator{name: val}}
 	return f
 }

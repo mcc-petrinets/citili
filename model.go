@@ -189,18 +189,18 @@ func (m *modelInfo) getMaxConstants(logger *log.Logger) {
 // of the twin COL model
 func isUnfolding(ptNode, colNode string, colNodes []string, logger *log.Logger) bool {
 	if strings.HasPrefix(ptNode, colNode) {
-		logger.Print("Nodes mapping: ", ptNode, " could have been obtained from ", colNode)
+		logger.Print("Nodes mapping info: ", ptNode, " could have been obtained from ", colNode)
 		if ptNode == colNode {
-			logger.Print("Nodes mapping: yes, it was (equality)")
+			logger.Print("Nodes mapping info: yes, it was (equality)")
 			return true
 		}
 		for _, n := range colNodes {
 			if ptNode == n {
-				logger.Print("Nodes mapping: no, it was not, ", n, " exists in COL")
+				logger.Print("Nodes mapping info: no, it was not, ", n, " exists in COL")
 				return false
 			}
 		}
-		logger.Print("Nodes mapping: yes, it was (prefix)")
+		logger.Print("Nodes mapping info: yes, it was (prefix)")
 		return true
 	}
 	return false
@@ -223,6 +223,7 @@ func (m *modelInfo) mapids(logger *log.Logger) error {
 				if isUnfolding(pp, p, m.twinModel.places, logger) {
 					m.placesMapping[p] = append(m.placesMapping[p], pp)
 					checkPlaces[i] = true
+					logger.Print("Place mapping: ", p, "->", pp)
 				}
 			}
 			// check that p was unfolded into something
@@ -265,6 +266,7 @@ func (m *modelInfo) mapids(logger *log.Logger) error {
 				if isUnfolding(tt, t, m.twinModel.transitions, logger) {
 					m.transitionsMapping[t] = append(m.transitionsMapping[t], tt)
 					checkTransitions[i] = true
+					logger.Print("Transition mapping: ", t, "->", tt)
 				}
 			}
 			// check that t was unfolded into something

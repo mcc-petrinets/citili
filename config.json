@@ -1,13 +1,13 @@
 {
-  "FilterSetSize": 32,
-  "FormulaDepth": 10,
+  "FilterSetSize": 2,
+  "FormulaDepth": 5,
   "MaxArity": 2,
   "MaxCardinalityAtomSize": 1,
   "MaxFireabilityAtomSize": 1,
-  "MaxFilterTries": 2,
+  "MaxFilterTries": 1,
   "MaxIntegerConstant": 50,
-  "NumFormulas": 16,
-  "NumUnfold": 8,
+  "NumFormulas": 2,
+  "NumUnfold": 1,
   "SMCMaxStates": 2000,
   "InputDir": "INPUTS",
   "NumProc": 1

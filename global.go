@@ -19,7 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 package main
 
 const (
-	version                            string = "v2022"
+	version                            string = "v2023"
 	CTLFireabilityXMLFileName          string = "CTLFireability.xml"
 	CTLCardinalityXMLFileName          string = "CTLCardinality.xml"
 	ReachabilityFireabilityXMLFileName string = "ReachabilityFireability.xml"
@@ -34,6 +34,7 @@ var defaultConfiguration config = config{
 	MaxArity:               2,        // max arity for operators
 	MaxFireabilityAtomSize: 1,        // max number of transitions in any atom
 	MaxCardinalityAtomSize: 1,        // max number of places in any atom
+	MinIntegerConstant:     0,        // min constant to appear in integere comparisions in formulas
 	MaxIntegerConstant:     100,      // max constant to appear in integer comparisons in formulas
 	InputDir:               "INPUTS", // where to find the models
 	NumFormulas:            16,       // number of formulas to generate
