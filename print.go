@@ -89,8 +89,8 @@ func (f formula) xmlPrint(m modelInfo, num int, formulaType string) (xmlp string
 	}
 
 	fid := fmt.Sprintf(
-		"%s-%s-%s-%s-%2.2d",
-		m.modelName, kind, m.modelInstance, formulaType, num,
+		"%s-%s-%s-%s-%s-%2.2d",
+		m.modelName, kind, m.modelInstance, formulaType, year, num,
 	)
 
 	xmlf := f.asxml(indent + indent + indent)
@@ -246,7 +246,7 @@ func (m modelInfo) writehrFormulas(formulas []formula, fileName string, formulaT
 
 	f, error := os.Create(filePath)
 	if error != nil {
-		logger.Print("ERROR: cannot create file ", filePath)
+		logger.Print("ERROR: cannot create file ", filePath)
 		return
 	}
 

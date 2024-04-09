@@ -276,6 +276,9 @@ func genIntconstant(min int, max int) (f formula) {
 	}
 	if min > max {
 		min = defaultConfiguration.MinIntegerConstant
+		if min > max {
+			min = max
+		}
 	}
 	f = formula{operator: integerconstant}
 	f.operand = make([]formula, 1)

@@ -19,6 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 package main
 
 const (
+	year                               string = "2023"
 	version                            string = "v2023"
 	CTLFireabilityXMLFileName          string = "CTLFireability.xml"
 	CTLCardinalityXMLFileName          string = "CTLCardinality.xml"
