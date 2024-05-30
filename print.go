@@ -276,8 +276,8 @@ func (f formula) hrPrint(m modelInfo, num int, formulaType string) (hrp string) 
 	}
 
 	fid := fmt.Sprintf(
-		"Property %s-%s-%s-%s-%2.2d",
-		m.modelName, kind, m.modelInstance, formulaType, num,
+		"Property %s-%s-%s-%s-%s-%2.2d",
+		m.modelName, kind, m.modelInstance, formulaType, year, num,
 	)
 
 	hrf := f.ashr()
