@@ -16,8 +16,7 @@ smclog*
 *.xml*
 *.tgz
 qualif/*
-config2022.json
-config2023.json
+config20*.json
 *.log
 *.zip
 MCC-2023/*

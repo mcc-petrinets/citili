@@ -22,7 +22,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 	"runtime"
 )
@@ -34,7 +33,7 @@ func main() {
 	flag.Parse()
 	getConfig(*configFile)
 
-	rand.Seed(globalConfiguration.Seed)
+	//randomGenerator = rand.New(rand.NewSource(globalConfiguration.Seed))
 
 	log.Print(
 		"Working with:\n",
@@ -89,6 +88,7 @@ func main() {
 }
 
 func handleModel(pos int, models []*modelInfo, numFormulas, formulaDepth, numUnfold int, routineNum int, doneChan chan int) {
+
 	m := models[pos]
 
 	logger := log.New(
@@ -97,11 +97,18 @@ func handleModel(pos int, models []*modelInfo, numFormulas, formulaDepth, numUnf
 		log.LstdFlags,
 	)
 
+	defer func() {
+		if err := recover(); err != nil {
+			logger.Print("PANIC regenerate for this model please")
+		}
+		models[pos] = nil
+		logger.Print("Ending goroutine")
+		doneChan <- routineNum
+	}()
+
 	logger.Print("Starting goroutine")
 
 	logger.Print("generating formulas")
 	m.genFormulas(numFormulas, formulaDepth, numUnfold, logger, routineNum)
-	models[pos] = nil
-	logger.Print("Ending goroutine")
-	doneChan <- routineNum
+
 }

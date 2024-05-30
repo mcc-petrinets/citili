@@ -20,7 +20,6 @@ package main
 
 import (
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -38,22 +37,22 @@ const (
 )
 
 type modelInfo struct {
-	filePath                 string
-	directory                string
-	modelName                string
-	modelType                modelType
-	modelInstance            string
-	modelInstanceSeparators  int // HACK: for dealing with models with - in the instance, MCC2021 surprise
-	twinModel                *modelInfo
-	pnml                     *pnml.Pnml
-	places                   []string            // ids of places to use for generation
-	unmappedPlaces           []string            // ids of places that will not be used for generation
-	transitions              []string            // ids of transitions to use for generation
-	unmappedTransitions      []string            // ids of transitions that will not be used for generation
-	placesMapping            map[string][]string // mapping of ids of places to ids of the twin model
-	transitionsMapping       map[string][]string // mapping of ids of transitions
-	maxConstantInMarking     int
-	maxConstantInTransitions int
+	filePath                string
+	directory               string
+	modelName               string
+	modelType               modelType
+	modelInstance           string
+	modelInstanceSeparators int // HACK: for dealing with models with - in the instance, MCC2021 surprise
+	twinModel               *modelInfo
+	pnml                    *pnml.Pnml
+	places                  []string            // ids of places to use for generation
+	unmappedPlaces          []string            // ids of places that will not be used for generation
+	transitions             []string            // ids of transitions to use for generation
+	unmappedTransitions     []string            // ids of transitions that will not be used for generation
+	placesMapping           map[string][]string // mapping of ids of places to ids of the twin model
+	transitionsMapping      map[string][]string // mapping of ids of transitions
+	maxConstantInMarking    int
+	//maxConstantInTransitions int
 }
 
 func listModels(inputDir string) []*modelInfo {
@@ -64,9 +63,14 @@ func listModels(inputDir string) []*modelInfo {
 	models := make([]*modelInfo, 0)
 	modelsMap := make(map[string](map[string]*modelInfo))
 
-	inputsInfo, error := ioutil.ReadDir(inputDir)
+	inputsInfo, error := os.ReadDir(inputDir)
 	if error != nil {
 		log.Panic(error)
+	}
+
+	matchingExpr, err := regexp.Compile(`\w+(-COL-)|(-PT-)\w+`)
+	if err != nil {
+		log.Panic("matchingExpr problem: ", err)
 	}
 
 	for _, fileInfo := range inputsInfo {
@@ -77,10 +81,7 @@ func listModels(inputDir string) []*modelInfo {
 		}
 
 		// directory names have to describe the type of model they contain
-		nameOk, error := regexp.MatchString(`\w+(-COL-)|(-PT-)\w+`, fileInfo.Name())
-		if error != nil {
-			log.Panic(error)
-		}
+		nameOk := matchingExpr.Match([]byte(fileInfo.Name()))
 		if !nameOk {
 			wrongName++
 			continue

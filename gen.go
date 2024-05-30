@@ -126,6 +126,7 @@ func (m *modelInfo) genericGeneration(numFormulas, depth int, canUnfold bool, ge
 		// filter out easy formula
 		logger.Print("Filtering formulas")
 		toKeep := m.filter(tmpFormulas, numFormulas-numFound, canUnfold, logger, routineNum)
+		logger.Print("Filtering completed, I keep the following formulas: ", toKeep)
 		for i := 0; i < len(toKeep) && numFound < numFormulas; i++ {
 			formulas[numFound] = tmpFormulas[toKeep[i]]
 			numFound++

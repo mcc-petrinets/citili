@@ -37,7 +37,7 @@ func (m modelInfo) writexmlFormulas(formulas []formula, fileName string, formula
 
 	f, error := os.Create(filePath)
 	if error != nil {
-		logger.Print("ERROR: cannot create file ", filePath)
+		logger.Print("ERROR: cannot create file ", filePath)
 		return
 	}
 
@@ -59,10 +59,7 @@ func (m modelInfo) writexmlFormulas(formulas []formula, fileName string, formula
 		}
 	}
 
-	_, error = f.WriteString(
-		fmt.Sprint(
-			"</property-set>\n",
-		))
+	_, error = f.WriteString("</property-set>\n")
 	if error != nil {
 		logger.Print("ERROR: cannot write to file ", filePath)
 		return

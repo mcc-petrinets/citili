@@ -63,7 +63,7 @@ func runSMC(model, formulas string, numToFind int, logger *log.Logger, routineNu
 	logSMCCommand := exec.Command("tee", "-a", logFile)
 	filterCommand1 := exec.Command("grep", "-v", "^smc:")
 	filterCommand2 := exec.Command("grep", "?")
-	fieldFilter := fmt.Sprint("-f", 6+numSeparators)
+	fieldFilter := fmt.Sprint("-f", 7+numSeparators)
 	cutCommand := exec.Command("cut", "-d-", fieldFilter)
 	logReader, smcWriter := io.Pipe()
 	command1Reader, logWriter := io.Pipe()
@@ -79,7 +79,7 @@ func runSMC(model, formulas string, numToFind int, logger *log.Logger, routineNu
 	cutCommand.Stdin = cutCommandReader
 	stdout, err := cutCommand.StdoutPipe()
 	if err != nil {
-		logger.Print("ERROR: filter, StdoutPipe(): ", err)
+		logger.Print("ERROR: filter, StdoutPipe(): ", err)
 		return tokeep
 	}
 	smcCommandOutput := bufio.NewReader(stdout)
@@ -140,6 +140,7 @@ func runSMC(model, formulas string, numToFind int, logger *log.Logger, routineNu
 	command2Writer.Close()
 	res, err = smcCommandOutput.ReadString('\n')
 	for ; err == nil; res, err = smcCommandOutput.ReadString('\n') {
+		//log.Print("SMC :", res)
 		v, err := strconv.Atoi(strings.TrimSuffix(res, "\n"))
 		if err != nil {
 			logger.Print("ERROR: filter, atoi: ", err)
